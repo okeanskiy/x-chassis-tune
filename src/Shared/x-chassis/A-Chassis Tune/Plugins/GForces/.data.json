@@ -1,0 +1,16 @@
+{
+  "className": "Frame",
+  "properties": {
+    "AnchorPoint": [1, 1],
+    "Attributes": {
+      "Moveable": true,
+      "WID": 1
+    },
+    "BackgroundColor3": [0, 0, 0],
+    "BackgroundTransparency": 0.5,
+    "BorderSizePixel": 0,
+    "Position": [[1.0, -10.0], [1.0, -10.0]],
+    "Size": [[0.20000000298023224, 0.0], [1.0, 0.0]],
+    "Visible": false
+  }
+}
