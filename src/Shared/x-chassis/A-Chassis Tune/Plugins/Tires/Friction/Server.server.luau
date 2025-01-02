@@ -1,7 +1,11 @@
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
 local car = script.Parent.Parent
 local _Tune = require(car["A-Chassis Tune"])
-local Units = require(car["A-Chassis Tune"].Units)
-local RunService = game:GetService("RunService")
+local Units = require(ReplicatedStorage.Units)
+
 local functionTable = {
 	create = function(_WheelTune)
 		for _, v in next, car.Wheels:GetChildren() do

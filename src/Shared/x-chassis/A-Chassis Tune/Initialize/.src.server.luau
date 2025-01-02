@@ -1,3 +1,4 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 --[[	
 	   ___  _____
 	  / _ |/ ___/	Avxnturador   	| Novena						    Eniiqzz	    |
@@ -51,7 +52,7 @@ script.Parent:WaitForChild("README")
 local car=script.Parent.Parent
 local Drive=car.Wheels:GetChildren()
 local _Tune=require(script.Parent)
-local Units = require(script.Parent.Units)
+local Units = require(ReplicatedStorage.Units)
 
 wait(_Tune.LoadDelay)
 

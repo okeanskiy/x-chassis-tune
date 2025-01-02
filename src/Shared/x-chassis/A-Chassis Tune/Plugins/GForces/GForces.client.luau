@@ -1,18 +1,12 @@
---[[	
-	   ___  _____
-	  / _ |/ ___/	Avxnturador   	| Novena						    Eniiqzz	    |
-	 / __ / /__		LuaInt         	| Novena						    midmm5	    |
-    /_/ |_\___/	 	Detomiks		| Base Chassis
 
-	                Version 1.6.3
---]]
--- By Detomiks
--- Press "V" To enable
-local car = script.Parent.Parent.Car.Value
-local values = script.Parent.Parent.Values
 local RunService = game:GetService("RunService")
 local Debris = game:GetService("Debris")
-local Units = require(car["A-Chassis Tune"].Units)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local car = script.Parent.Parent.Car.Value
+local values = script.Parent.Parent.Values
+
+local Units = require(ReplicatedStorage.Units)
 local _Tune = require(car["A-Chassis Tune"])
 local player=game.Players.LocalPlayer
 local mouse=player:GetMouse()

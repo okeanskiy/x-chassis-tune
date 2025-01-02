@@ -1,15 +1,9 @@
---[[	
-	   ___  _____
-	  / _ |/ ___/	Avxnturador   	| Novena						    Eniiqzz	    |
-	 / __ / /__		LuaInt         	| Novena						    midmm5	    |
-    /_/ |_\___/	 	Detomiks		| Base Chassis                      autopilo7   |
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
-	                Version 1.6.4
---]]
--- Redesigned gauges by Detomiks (definitely not a gran turismo clone!1!!11)
--- Hold "V" to hide gauges
 local autoscaling	= true		--Estimates top speed
-local Units = require(script.Parent.Parent.Car.Value["A-Chassis Tune"].Units)
+local Units = require(ReplicatedStorage.Units)
 
 local UNITS	= {								--Click on speed to change units
 											--First unit is default	
@@ -49,8 +43,7 @@ local gauges = script.Parent
 local center = gauges.Center
 local values = script.Parent.Parent.Values
 local isOn = script.Parent.Parent.IsOn
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+
 
 UserInputService.InputBegan:Connect(function(input, isTyping)
 	if not isTyping then

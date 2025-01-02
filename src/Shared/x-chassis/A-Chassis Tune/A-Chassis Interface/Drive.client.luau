@@ -1,11 +1,7 @@
---[[	
-	   ___  _____
-	  / _ |/ ___/	Avxnturador   	| Novena						    Eniiqzz	    |
-	 / __ / /__		LuaInt         	| Novena						    midmm5	    |
-    /_/ |_\___/	 	Detomiks		| Base Chassis                      autopilo7   |
 
-	                Version 1.6.4
---]]
+local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 --[[START]]
 script.Parent:WaitForChild("Car")
@@ -16,11 +12,10 @@ script.Parent:WaitForChild("Values")
 --[[Dependencies]]
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
-local UserInputService = game:GetService("UserInputService")
-local GuiService = game:GetService("GuiService")
+
 local car = script.Parent.Car.Value
 local _Tune = require(car["A-Chassis Tune"])
-local Units = require(car["A-Chassis Tune"].Units)
+local Units = require(ReplicatedStorage.Units)
 local values = script.Parent.Values
 
 player.PlayerGui.ScreenOrientation = Enum.ScreenOrientation.LandscapeSensor

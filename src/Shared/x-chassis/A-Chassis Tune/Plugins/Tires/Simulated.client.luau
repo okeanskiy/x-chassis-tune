@@ -1,21 +1,14 @@
---[[	
-	   ___  _____
-	  / _ |/ ___/	Avxnturador   	| Novena						    Eniiqzz	    |
-	 / __ / /__		LuaInt         	| Novena						    midmm5	    |
-    /_/ |_\___/	 	Detomiks		| Base Chassis                      autopilo7   |
 
-	                Version 1.6.4
---]]
---------------------------------------------------------------------------
+local HapticService = game:GetService("HapticService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local car = script.Parent.Parent.Car.Value
 local _Tune = require(car["A-Chassis Tune"])
 local _WheelTune = require(script.Parent.Tune)
-local Units = require(car["A-Chassis Tune"].Units)
+local Units = require(ReplicatedStorage.Units)
 local values = script.Parent.Parent:WaitForChild("Values")
 local event = car:WaitForChild("Friction")
-local RunService = game:GetService("RunService")
-local HapticService = game:GetService("HapticService")
+
 local player=game.Players.LocalPlayer
 local mouse=player:GetMouse()
 
