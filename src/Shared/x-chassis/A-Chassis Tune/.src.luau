@@ -155,11 +155,6 @@ do
 		Tune.RedlineTorque			= 169		-- How much torque the engine makes at redline.
 		Tune.RedlineTorqueCurve		= 0.42		-- The shape of the torque curve between PeakRPM and redline.
 
-		Tune.VVLTorque				= 20		-- Variable Valve Lift (VVL, aka VTEC)'s amount of torque. Set this to 0 to turn off.
-		Tune.VVLRPM					= 6340		-- When VVL activates in RPM.
-		Tune.VVLTime				= 500		-- How long it takes for VVL to activate in RPM.
-		Tune.VVLCurve				= 0.002		-- The shape of the curve during VVL activation.
-
 		Tune.HPLimit				= 400		-- The horsepower limit of the engine (set to 0 to turn off).
 
 	-- Electric Engine

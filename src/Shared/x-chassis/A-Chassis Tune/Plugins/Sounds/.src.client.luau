@@ -160,13 +160,8 @@ local function getWheelSpeed()
 	return total
 end
 
-local function f(m, n, p, q, M, b, x)
-	return math.clamp(M - ( (q-n)/(b^p-b^m) * (b^x-b^m) + n ), 0, M)
-end
-
 local function gain(data, x)
-	local vvl = (_Tune.VVLTorque - f(_Tune.VVLRPM/1000, 0, (_Tune.VVLRPM + _Tune.VVLTime)/1000, _Tune.VVLTorque, _Tune.VVLTorque, _Tune.VVLCurve, values.RPM.Value/1000))/_Tune.VVLTorque * data.eq[x]
-	return data.eq[x] + (data.decelEq[x]*(1-values.Throttle.Value)) + vvl
+	return data.eq[x] + (data.decelEq[x] * (1 - values.Throttle.Value))
 end
 
 local function update()

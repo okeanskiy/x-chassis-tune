@@ -69,7 +69,7 @@ local function calculate()
 	
 	local _GThrot = 1
 	
-	local function f(m, n, p, q, M, b, x)
+	local function computeTorqueCurve(m, n, p, q, M, b, x)
 		return math.clamp(M - ( (q-n)/(b^p-b^m) * (b^x-b^m) + n ), 0, M)
 	end
 	
@@ -87,14 +87,13 @@ local function calculate()
 		local TTorque = 0
 		local STorque = 0
 		if _Tune.Engine then
-			local NIdleTorque = f(_Tune.IdleRPM/1000, _Tune.IdleTorque, _Tune.PeakTorqueRPM/1000, _Tune.PeakTorque, _Tune.PeakTorque, _Tune.IdleTorqueCurve, x)
-			local NRedlineTorque = f(_Tune.PeakTorqueRPM/1000, _Tune.PeakTorque, _Tune.Redline/1000, _Tune.RedlineTorque, _Tune.PeakTorque, 1/_Tune.RedlineTorqueCurve, x)
-			local VVL = _Tune.VVLTorque - f(_Tune.VVLRPM/1000, 0, (_Tune.VVLRPM + _Tune.VVLTime)/1000, _Tune.VVLTorque, _Tune.VVLTorque, _Tune.VVLCurve, x)
-			NTorque = boolToNum[_Tune.Engine] * (_Tune.PeakTorque - NIdleTorque - NRedlineTorque + VVL)
+			local NIdleTorque = computeTorqueCurve(_Tune.IdleRPM/1000, _Tune.IdleTorque, _Tune.PeakTorqueRPM/1000, _Tune.PeakTorque, _Tune.PeakTorque, _Tune.IdleTorqueCurve, x)
+			local NRedlineTorque = computeTorqueCurve(_Tune.PeakTorqueRPM/1000, _Tune.PeakTorque, _Tune.Redline/1000, _Tune.RedlineTorque, _Tune.PeakTorque, 1/_Tune.RedlineTorqueCurve, x)
+			NTorque = boolToNum[_Tune.Engine] * (_Tune.PeakTorque - NIdleTorque - NRedlineTorque)
 			_NH, _NT = (NTorque*x)/5.252, NTorque
 
 			if _Tune.Turbochargers > 0 then
-				local _TBoostGoal = _Tune.Turbochargers * _GThrot^3 * (_Tune.T_Boost - f(_Tune.IdleRPM/1000, _Tune.T_IdleBoost, _Tune.T_PeakRPM/1000, _Tune.T_Boost, _Tune.T_Boost, 1/_Tune.T_Curve, x))
+				local _TBoostGoal = _Tune.Turbochargers * _GThrot^3 * (_Tune.T_Boost - computeTorqueCurve(_Tune.IdleRPM/1000, _Tune.T_IdleBoost, _Tune.T_PeakRPM/1000, _Tune.T_Boost, _Tune.T_Boost, 1/_Tune.T_Curve, x))
 				--if _TBoostGoal > _TBoost then
 				--	_TBoost = math.min(_TBoost + _Tune.T_SpoolIncrease * _GThrot * deltaTime, _TBoostGoal)
 				--elseif _TBoost > _TBoostGoal then
@@ -105,8 +104,8 @@ local function calculate()
 				_TH, _TT = (TTorque*x)/5.252, TTorque
 			end
 			if _Tune.Superchargers > 0 then
-				local SIdleBoost = f(_Tune.IdleRPM/1000, _Tune.S_IdleBoost, _Tune.S_PeakRPM/1000, _Tune.S_PeakBoost, _Tune.S_PeakBoost, _Tune.S_IdleCurve, x)
-				local SRedlineBoost = f(_Tune.S_PeakRPM/1000, _Tune.S_PeakBoost, _Tune.Redline/1000, _Tune.S_RedlineBoost, _Tune.S_PeakBoost, 1/_Tune.S_RedlineCurve, x)
+				local SIdleBoost = computeTorqueCurve(_Tune.IdleRPM/1000, _Tune.S_IdleBoost, _Tune.S_PeakRPM/1000, _Tune.S_PeakBoost, _Tune.S_PeakBoost, _Tune.S_IdleCurve, x)
+				local SRedlineBoost = computeTorqueCurve(_Tune.S_PeakRPM/1000, _Tune.S_PeakBoost, _Tune.Redline/1000, _Tune.S_RedlineBoost, _Tune.S_PeakBoost, 1/_Tune.S_RedlineCurve, x)
 				local _SBoostGoal = _Tune.Superchargers * _GThrot * (_Tune.S_PeakBoost - SIdleBoost - SRedlineBoost)
 				--if _SBoostGoal > _SBoost then
 				--	_SBoost = math.min(_SBoost + _Tune.S_PeakBoost*_Tune.S_Response*deltaTime, _SBoostGoal)
@@ -122,7 +121,7 @@ local function calculate()
 			end
 		end
 		if _Tune.Electric then
-			ETorque = boolToNum[_Tune.Electric] * (_Tune.E_Torque - f(_Tune.E_TransitionRPM/1000, _Tune.E_Torque, _Tune.E_Redline/1000, _Tune.E_RedlineTorque, _Tune.E_Torque, _Tune.E_Curve, x))
+			ETorque = boolToNum[_Tune.Electric] * (_Tune.E_Torque - computeTorqueCurve(_Tune.E_TransitionRPM/1000, _Tune.E_Torque, _Tune.E_Redline/1000, _Tune.E_RedlineTorque, _Tune.E_Torque, _Tune.E_Curve, x))
 			_EH, _ET = (ETorque*x)/5.252, ETorque
 		end
 		

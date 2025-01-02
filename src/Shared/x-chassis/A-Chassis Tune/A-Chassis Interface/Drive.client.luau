@@ -891,10 +891,8 @@ function Engine(dt)
 			1/TuneData.RedlineTorqueCurve,
 			x
 		)
-		
-		local variableValveLift = TuneData.VVLTorque - computeTorqueCurve(TuneData.VVLRPM/1000, 0, (TuneData.VVLRPM + TuneData.VVLTime)/1000, TuneData.VVLTorque, TuneData.VVLTorque, TuneData.VVLCurve, x)
 
-		NTorque = boolToNum[TuneData.Engine] * (TuneData.PeakTorque - NIdleTorque - NRedlineTorque + variableValveLift)
+		NTorque = boolToNum[TuneData.Engine] * (TuneData.PeakTorque - NIdleTorque - NRedlineTorque)
 		NetHP, NetTorque = (NTorque*x)/5.252, NTorque
 		
 		if TuneData.Turbochargers > 0 then
