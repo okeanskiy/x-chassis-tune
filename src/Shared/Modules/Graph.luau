@@ -18,8 +18,8 @@ function GraphHandler.Theme(ThemeDictionary)
 --]=]
 
 local TextService = game:GetService("TextService")
-local screen = script:FindFirstAncestorOfClass("ScreenGui")
-local _Tune = require(screen.Car.Value["A-Chassis Tune"])
+-- local screen = script:FindFirstAncestorOfClass("ScreenGui")
+-- local _Tune = require(screen.Car.Value["A-Chassis Tune"])
 
 local Graph = {}
 
@@ -46,7 +46,10 @@ local function getKeyColor(name)
 end
 
 
-function Graph.new(Frame)
+function Graph.new(Frame, dependencies: any)
+	local dependencies = dependencies or {}
+	local _Tune = dependencies._Tune
+
 	if not Frame then error("Must give graph a frame") end
 	local GraphHandler = {Frame = Frame; Resolution = 75; Colors = {}; LineTypes = {}}
 	
@@ -257,32 +260,34 @@ function Graph.new(Frame)
 			end
 		end
 		
-		for x=0,1,1/math.round(_Tune.Redline/1000+.49) do
-			local Marker = Instance.new("TextLabel")
-			Marker.Name = x
-			Marker.Size = UDim2.new(1,0,0.08,0)
-			Marker.AnchorPoint = Vector2.new(.5,0)
-			Marker.Position = UDim2.new(x,0,.3,0)
-			Marker.Text = math.round(0 + (XMax*(x))/10)*10
-			Marker.TextXAlignment = Enum.TextXAlignment.Center
+		if _Tune then
+			for x=0,1,1/math.round(_Tune.Redline/1000+.49) do
+				local Marker = Instance.new("TextLabel")
+				Marker.Name = x
+				Marker.Size = UDim2.new(1,0,0.08,0)
+				Marker.AnchorPoint = Vector2.new(.5,0)
+				Marker.Position = UDim2.new(x,0,.3,0)
+				Marker.Text = math.round(0 + (XMax*(x))/10)*10
+				Marker.TextXAlignment = Enum.TextXAlignment.Center
 
-			Marker.TextColor3 = Color3.new(1,1,1)
-			Marker.Font = Enum.Font.SourceSans
-			Marker.BackgroundTransparency = 1
-			Marker.TextSize = (GraphHandler.Frame.AbsoluteSize.X*0.03)
-			Marker.ZIndex = BaseZIndex+3
-			Marker.Parent = XMarkers
-			if 0 < x and x < 1 then
-				local GridMark = Instance.new("Frame")
-				GridMark.Name = x
-				GridMark.Size = UDim2.new(0,1, 1,0)
-				GridMark.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-				GridMark.BackgroundTransparency = .6
-				GridMark.ZIndex = BaseZIndex+4
-				GridMark.BorderSizePixel = 0
-				GridMark.AnchorPoint = Vector2.new(.5,0)
-				GridMark.Position = UDim2.new(x, 0, 0, 0)
-				GridMark.Parent = GridMarks
+				Marker.TextColor3 = Color3.new(1,1,1)
+				Marker.Font = Enum.Font.SourceSans
+				Marker.BackgroundTransparency = 1
+				Marker.TextSize = (GraphHandler.Frame.AbsoluteSize.X*0.03)
+				Marker.ZIndex = BaseZIndex+3
+				Marker.Parent = XMarkers
+				if 0 < x and x < 1 then
+					local GridMark = Instance.new("Frame")
+					GridMark.Name = x
+					GridMark.Size = UDim2.new(0,1, 1,0)
+					GridMark.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+					GridMark.BackgroundTransparency = .6
+					GridMark.ZIndex = BaseZIndex+4
+					GridMark.BorderSizePixel = 0
+					GridMark.AnchorPoint = Vector2.new(.5,0)
+					GridMark.Position = UDim2.new(x, 0, 0, 0)
+					GridMark.Parent = GridMarks
+				end
 			end
 		end
 		

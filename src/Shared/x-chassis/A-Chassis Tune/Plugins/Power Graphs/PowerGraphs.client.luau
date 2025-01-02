@@ -1,20 +1,14 @@
---[[	
-	   ___  _____
-	  / _ |/ ___/	Avxnturador   	| Novena						    Eniiqzz	    |
-	 / __ / /__		LuaInt         	| Novena						    midmm5	    |
-    /_/ |_\___/	 	Detomiks		| Base Chassis                      autopilo7   |
 
-	                Version 1.6.4
---]]
--- By Detomiks (boatbomber graph module)
--- Press "V" To enable
-local Graph = require(script.Graph)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Graph = require(ReplicatedStorage.Modules.Graph)
 local screen = script:FindFirstAncestorOfClass("ScreenGui")
 local car = screen.Car.Value
 local boolToNum = {[true] = 1, [false] = 0}
 local _Tune = require(car["A-Chassis Tune"])
 local values = screen.Values
-local RunService = game:GetService("RunService")
+
 local RPMBar = script.Parent.Bar
 local CurrentStats = script.Parent.Current
 local MaxStats = script.Parent.Max
@@ -28,11 +22,6 @@ mouse.KeyDown:connect(function(key)
 end)
 
 -- Graphing
-local C = 1
-local C1 = 1
-
-local min = math.min
-local max = math.max
 
 local MaxPower = {0, 0}
 local MaxTorque = {0, 0}
@@ -48,7 +37,6 @@ local function calculate()
 	MaxTorque = {0, 0}
 	
 	local x = 0
-	local deltaTime = 1
 	
 	local _Boost = 0
 	local _TBoost = 0
@@ -94,11 +82,6 @@ local function calculate()
 
 			if _Tune.Turbochargers > 0 then
 				local _TBoostGoal = _Tune.Turbochargers * _GThrot^3 * (_Tune.T_Boost - computeTorqueCurve(_Tune.IdleRPM/1000, _Tune.T_IdleBoost, _Tune.T_PeakRPM/1000, _Tune.T_Boost, _Tune.T_Boost, 1/_Tune.T_Curve, x))
-				--if _TBoostGoal > _TBoost then
-				--	_TBoost = math.min(_TBoost + _Tune.T_SpoolIncrease * _GThrot * deltaTime, _TBoostGoal)
-				--elseif _TBoost > _TBoostGoal then
-				--	_TBoost = math.max(_TBoost * _Tune.T_SpoolDecrease / deltaTime, _TBoostGoal)
-				--end
 				_TBoost = _TBoostGoal
 				TTorque = _TBoost * _Tune.T_Efficiency
 				_TH, _TT = (TTorque*x)/5.252, TTorque
@@ -107,11 +90,6 @@ local function calculate()
 				local SIdleBoost = computeTorqueCurve(_Tune.IdleRPM/1000, _Tune.S_IdleBoost, _Tune.S_PeakRPM/1000, _Tune.S_PeakBoost, _Tune.S_PeakBoost, _Tune.S_IdleCurve, x)
 				local SRedlineBoost = computeTorqueCurve(_Tune.S_PeakRPM/1000, _Tune.S_PeakBoost, _Tune.Redline/1000, _Tune.S_RedlineBoost, _Tune.S_PeakBoost, 1/_Tune.S_RedlineCurve, x)
 				local _SBoostGoal = _Tune.Superchargers * _GThrot * (_Tune.S_PeakBoost - SIdleBoost - SRedlineBoost)
-				--if _SBoostGoal > _SBoost then
-				--	_SBoost = math.min(_SBoost + _Tune.S_PeakBoost*_Tune.S_Response*deltaTime, _SBoostGoal)
-				--elseif _SBoost > _SBoostGoal then
-				--	_SBoost = math.max(_SBoost - _Tune.S_PeakBoost*_Tune.S_Response*deltaTime, _SBoostGoal)
-				--end
 				_SBoost = _SBoostGoal
 				STorque = _SBoost * _Tune.S_Efficiency
 				_SH, _ST = (STorque*x)/5.252, STorque
@@ -150,7 +128,13 @@ local function calculate()
 end
 calculate()
 
-local GraphA = Graph.new(script.Parent.Graphs)
+local GraphA = Graph.new(
+	script.Parent.Graphs,
+	{
+		_Tune = _Tune,
+	}
+)
+
 GraphA.Resolution = 40
 GraphA.Data = Graphs
 GraphA.Colors = {
