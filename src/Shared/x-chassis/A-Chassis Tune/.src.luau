@@ -211,7 +211,7 @@ do
 	
 	Tune.IgnitionRPM	= 2400		-- This is how high the engine revs for the ignition.
 	Tune.IgnitionAccel	= 100		-- The acceleration of the RPM while starting the car.
-	Tune.ShiftRPM		= 8500		-- This is when the engine shifts.
+	Tune.ShiftRPM		= 6500		-- This is when the engine shifts.
 
 	Tune.Flywheel		= 500		-- Flywheel weight (higher = faster response, lower = more stable RPM)
 	Tune.FlywheelEnergy	= 1000		-- How much torque per 1000 RPM the flywheel can produce when the clutch is dumped.
@@ -258,12 +258,6 @@ do
 		"New"		: Speed controls clutch engagement			(AC6C V1.2)
 		"Old"		: Speed and RPM control clutch engagement	(AC6C V1.1)		]]
 
-	Tune.ClutchType 	= "Clutch"										--[[
-	[Types]
-		"Clutch"			: Standard clutch, recommended
-		"TorqueConverter"	: Torque converter, keeps RPM up -- will remove this
-		"CVT"				: Continously Variable Transmission -- will remove this
-																		]] 
 --[[Transmission]]
 	--Transmission Settings
 	Tune.Stall			= true		-- Stalling, enables the car to stall. An ignition plugin would be necessary. Disables if Tune.Clutch is false.

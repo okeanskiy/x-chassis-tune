@@ -587,7 +587,6 @@ if not TuneData.Engine and TuneData.Electric then
 	TuneData.Clutch = false 
 	TuneData.IdleRPM = 0 
 	TuneData.IdleThrottle = 0
-	TuneData.ClutchType = "Clutch" 
 	TuneData.AutoShiftType = "DCT" 
 	TuneData.ShiftUpTime = 0.1 
 	TuneData.ShiftDnTime = 0.1 
@@ -755,18 +754,13 @@ function Engine(dt)
 	for i,v in next, (Drivetrain) do maxSpin = maxSpin + _WheelSpeeds[v.Name] maxCount = maxCount + 1 end
 	maxSpin=maxSpin/maxCount
 	local _WheelRPM = maxSpin*_CurrentRatio*finalDriveRatioRPM
-	
-	--CVT
-	if TuneData.ClutchType == "CVT" then
-		_CVTRatio = math.clamp((TuneData.CVTRPM*_GThrot)/(maxSpin*finalDriveRatioRPM), TuneData.CVTMinRatio, TuneData.CVTMaxRatio)
-	end
 
 	--Update ratio
-	_CurrentRatio = TuneData.ClutchType == "CVT" and _CVTRatio or TuneData.Ratios[CurrentGear+2]
+	_CurrentRatio = TuneData.Ratios[CurrentGear+2]
 	_spLimit = (TuneData.Redline+100)/(finalDriveRatioRPM*_CurrentRatio)
 	
 	--Neutral Gear
-	if ((CurrentGear == 0 or isShifting) and _IsOn) then 
+	if (CurrentGear == 0 or isShifting) and _IsOn then 
 		_ClPressing = true
 		_Clutch = 1
 		_StallOK = false
@@ -780,7 +774,9 @@ function Engine(dt)
 	local revMin = 1
 	local goalMin = 1
 	local goalMax = TuneData.Redline+100
-	if TuneData.Stall and TuneData.Clutch then revMin = 0 end
+	if TuneData.Stall and TuneData.Clutch then
+		revMin = 0
+	end
 	
 	if isShifting and ShiftUp then 
 		_GThrot = TuneData.IdleThrottle/100
@@ -855,22 +851,26 @@ function Engine(dt)
 	
 	if TuneData.Clutch then
 		if Values.AutoClutch and _IsOn then
-			if TuneData.ClutchType == "Clutch" or TuneData.ClutchType == "CVT" then
-				if _ClPressing then _ClutchKick = 1 end
-				_ClutchKick = _ClutchKick*(TuneData.ClutchEngage/100)		
-				local ClRPMInfluence = math.max((RPM)*TuneData.ClutchRPMMult/(TuneData.Redline),0)
-				if TuneData.ClutchMode == "New" then ClRPMInfluence = 0 end
-				_ClutchModulate = math.min(((((script.Parent.Values.Velocity.Value.Magnitude/(Units.Velocity_mdivs/3.6)/TuneData.SpeedEngage)/math.abs(CurrentGear)) + ClRPMInfluence) - _ClutchKick), 1)
-			elseif TuneData.ClutchType == "TorqueConverter" and TuneData.TQLock then
-				if (_GThrot<=TuneData.IdleThrottle/100 and script.Parent.Values.Velocity.Value.Magnitude/(Units.Velocity_mdivs/3.6)<TuneData.SpeedEngage) or (_GThrot>TuneData.IdleThrottle/100 and (RPM < TuneData.RPMEngage and _WheelRPM < TuneData.RPMEngage)) then
-					_ClutchModulate = math.min(_ClutchModulate*(TuneData.ClutchEngage/100), 1)
-				else
-					_ClutchModulate = math.min(_ClutchModulate*(TuneData.ClutchEngage/100)+(1-(TuneData.ClutchEngage/100)), 1)
-				end
-			elseif TuneData.ClutchType == "TorqueConverter" and not TuneData.TQLock then
-				_ClutchModulate = math.min((RPM/TuneData.Redline)*0.7, 1)
+			if _ClPressing then
+				_ClutchKick = 1
 			end
-			if not _ClPressing then _Clutch = math.min(1-_ClutchModulate,1) else _Clutch = 1 end
+
+			_ClutchKick = _ClutchKick*(TuneData.ClutchEngage/100)		
+			
+			local ClRPMInfluence = math.max((RPM)*TuneData.ClutchRPMMult/(TuneData.Redline),0)
+			
+			if TuneData.ClutchMode == "New" then
+				ClRPMInfluence = 0
+			end
+			
+			_ClutchModulate = math.min(((((script.Parent.Values.Velocity.Value.Magnitude/(Units.Velocity_mdivs/3.6)/TuneData.SpeedEngage)/math.abs(CurrentGear)) + ClRPMInfluence) - _ClutchKick), 1)
+
+			if not _ClPressing then
+				_Clutch = math.min(1 - _ClutchModulate, 1)
+			else
+				_Clutch = 1
+			end
+			
 			_StallOK = (_Clutch<=0.01) or _StallOK
 		else
 			_StallOK = TuneData.Stall
@@ -878,7 +878,11 @@ function Engine(dt)
 		end
 	else
 		_StallOK = false
-		if not _ClPressing and not isShifting then _Clutch = 0 else _Clutch = 1 end
+		if not _ClPressing and not isShifting then
+			_Clutch = 0
+		else
+			_Clutch = 1
+		end
 	end
 	
 	if revLimiting or script.Parent.Starting.Value then
