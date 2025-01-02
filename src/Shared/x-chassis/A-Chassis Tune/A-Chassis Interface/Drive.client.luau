@@ -596,46 +596,51 @@ end
 --Powertrain
 wait()
 
---Automatic Transmission
 function Auto()
-	local maxSpin = 0
-
-	for _, v in Drivetrain do
-		if _WheelSpeeds[v.Name] > maxSpin then
-			maxSpin = _WheelSpeeds[v.Name]
-		end
-	end
-
 	if not (_IsOn) then
 		return
 	end
 
-	if TuneData.AutoShiftVers == "Old" and CurrentGear == 0 then
+	local assemblySpeed = car.DriveSeat.AssemblyLinearVelocity.Magnitude
+
+	local isLegacyShiftVersion = TuneData.AutoShiftVers == "Old"
+	local isLowSpeed = assemblySpeed < 5
+
+	if isLegacyShiftVersion and CurrentGear == 0 then
 		CurrentGear = 1
 		_ClPressing = false
 	end
 
+	if CurrentGear <= 0 then
+		if _InThrot > 0 and isLowSpeed and isLegacyShiftVersion then
+			CurrentGear = 1
+			_ClPressing = false
+		end
+	end
+
 	if CurrentGear >= 1 then
-		if (CurrentGear==1 and _InBrake > 0 and car.DriveSeat.AssemblyLinearVelocity.Magnitude < 5) and TuneData.AutoShiftVers == "Old" then
-			CurrentGear = -1 _ClPressing = false
-		elseif car.DriveSeat.AssemblyLinearVelocity.Magnitude > 5 and TuneData.ClutchType ~= "CVT" then
-			if TuneData.AutoShiftMode == "RPM" then
-				if RPM>(TuneData.ShiftRPM+TuneData.AutoUpThresh) then
-					if not ShiftUp and not isShifting then ShiftUp = true end
-				elseif math.max(math.min(maxSpin*TuneData.Ratios[CurrentGear+1]*finalDriveRatioRPM,TuneData.Redline+100),0)<(TuneData.ShiftRPM-TuneData.AutoDownThresh) and CurrentGear>1 then
-					if not ShiftDown and not isShifting then ShiftDown = true end 
+		if isLegacyShiftVersion and CurrentGear == 1 and _InBrake > 0 and isLowSpeed then
+			CurrentGear = -1
+			_ClPressing = false
+			return
+		end
+
+		if not isLowSpeed then
+			local rpmShiftUp = TuneData.ShiftRPM + TuneData.AutoUpThresh
+			local rpmShiftDown = TuneData.ShiftRPM - TuneData.AutoDownThresh
+
+			local speedToShiftUp = math.ceil(wheelDriveRatio * rpmShiftUp / _CurrentRatio / finalDriveRatio)
+			local speedToShiftDown = math.ceil(wheelDriveRatio * rpmShiftDown / TuneData.Ratios[CurrentGear+1] / finalDriveRatio)
+
+			if assemblySpeed > speedToShiftUp then
+				if not ShiftUp and not isShifting then
+					ShiftUp = true
 				end
-			else
-				if car.DriveSeat.AssemblyLinearVelocity.Magnitude > math.ceil(wheelDriveRatio*(TuneData.ShiftRPM+TuneData.AutoUpThresh)/_CurrentRatio/finalDriveRatio) then
-					if not ShiftUp and not isShifting then ShiftUp = true end
-				elseif car.DriveSeat.AssemblyLinearVelocity.Magnitude < math.ceil(wheelDriveRatio*(TuneData.ShiftRPM-TuneData.AutoDownThresh)/TuneData.Ratios[CurrentGear+1]/finalDriveRatio) and CurrentGear>1 then
-					if not ShiftDown and not isShifting then ShiftDown = true end
+			elseif assemblySpeed < speedToShiftDown and CurrentGear > 1 then
+				if not ShiftDown and not isShifting then
+					ShiftDown = true
 				end
 			end
-		end
-	else
-		if (_InThrot > 0 and car.DriveSeat.AssemblyLinearVelocity.Magnitude < 5) and TuneData.AutoShiftVers == "Old" then
-			CurrentGear = 1 _ClPressing = false
 		end
 	end
 end

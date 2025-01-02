@@ -261,8 +261,8 @@ do
 	Tune.ClutchType 	= "Clutch"										--[[
 	[Types]
 		"Clutch"			: Standard clutch, recommended
-		"TorqueConverter"	: Torque converter, keeps RPM up
-		"CVT"				: Continously Variable Transmission
+		"TorqueConverter"	: Torque converter, keeps RPM up -- will remove this
+		"CVT"				: Continously Variable Transmission -- will remove this
 																		]] 
 --[[Transmission]]
 	--Transmission Settings
@@ -290,10 +290,6 @@ do
 	Tune.LimitClutch	= false		-- Will also limit RPMs while the clutch is pressed down
 
 	--Automatic Settings
-	Tune.AutoShiftMode	= "Speed"												--[[
-	[Modes]
-		"Speed"		: Shifts based on wheel speed
-		"RPM"		: Shifts based on RPM										]]	
 	Tune.AutoShiftType	= "DCT"												--[[
 	[Types]
 		"Rev"		: Clutch engages fully once RPM reached			(AC6C V1)
