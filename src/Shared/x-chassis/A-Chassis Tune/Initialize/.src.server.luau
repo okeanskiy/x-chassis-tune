@@ -1,15 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
---[[	
-	   ___  _____
-	  / _ |/ ___/	Avxnturador   	| Novena						    Eniiqzz	    |
-	 / __ / /__		LuaInt         	| Novena						    midmm5	    |
-    /_/ |_\___/	 	Detomiks		| Base Chassis                      autopilo7   |
 
-	                Version 1.6.4
---]]
-
---[[START]]
-_BuildVersion = require(script.Parent.README)
+_BuildVersion = "1.6.4"
 
 --[[Weld functions]]
 function MakeWeld(x,y,type,s) 
@@ -47,7 +38,6 @@ end
 --[[Initialize]]
 script.Parent:WaitForChild("A-Chassis Interface")
 script.Parent:WaitForChild("Plugins")
-script.Parent:WaitForChild("README")
 
 local car=script.Parent.Parent
 local Drive=car.Wheels:GetChildren()
