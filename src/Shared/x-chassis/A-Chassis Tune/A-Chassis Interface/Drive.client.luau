@@ -646,12 +646,31 @@ function Auto()
 end
 
 function Gear()
-	local maxSpin=0
-	for i,v in next, (Drivetrain) do if _WheelSpeeds[v.Name]>maxSpin then maxSpin = _WheelSpeeds[v.Name] end end
+	local maxSpin = 0
+	for _, v in Drivetrain do 
+		if _WheelSpeeds[v.Name] > maxSpin then
+			maxSpin = _WheelSpeeds[v.Name]
+		end
+	end
+
 	if ShiftUp and not isShifting then
-		if (_TMode == "Manual" and not _ClPressing) or (_TMode == "Manual" and TuneData.ClutchRel and (_InThrot>0)) or CurrentGear == #TuneData.Ratios-2 or (_TMode ~= "Manual" and not _IsOn) then ShiftUp = false return end
+		if _TMode == "Manual" and not _ClPressing then
+			ShiftUp = false 
+			return
+		end
+
+		if CurrentGear == #TuneData.Ratios-2 then
+			ShiftUp = false
+			return
+		end
+
+		if _TMode ~= "Manual" and not _IsOn then
+			return
+		end
+		
 		local NextGear = math.min(CurrentGear+3,#TuneData.Ratios)
-		if _TMode~="Manual" and TuneData.ClutchType ~= "CVT" then
+		
+		if _TMode ~= "Manual" then
 			isShifting = true
 			if CurrentGear>0 then 
 				if TuneData.AutoShiftType=="DCT" then 
@@ -661,10 +680,14 @@ function Gear()
 				end
 			end
 		end
+
 		ShiftUp = false
 		isShifting = false
-		if _TMode ~= "Manual" and not _IsOn then return end
-		if NextGear >= 4 and TuneData.ClutchType == "CVT" then return end  -- make sure it cannot go past 1st gear
+
+		if _TMode ~= "Manual" and not _IsOn then
+			return
+		end
+
 		CurrentGear = math.min(CurrentGear+1,#TuneData.Ratios-2)
 		if _TMode ~= "Manual" or (_TMode == "Manual" and CurrentGear == 1) and _IsOn then _ClPressing = false end
 	end

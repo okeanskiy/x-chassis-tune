@@ -267,7 +267,6 @@ do
 --[[Transmission]]
 	--Transmission Settings
 	Tune.Stall			= true		-- Stalling, enables the car to stall. An ignition plugin would be necessary. Disables if Tune.Clutch is false.
-	Tune.ClutchRel		= false		-- If true, the driver must let off the gas before shifting to a higher gear. Recommended false for beginners.
 	Tune.ClutchEngage	= 10		-- How fast engagement is (0 = instant, 99 = super slow)	
 	Tune.SpeedEngage 	= 20		-- Speed the clutch fully engages at (Based on km/h)
 	Tune.ClutchIdle		= 400		-- How much RPM past idle is needed to engage the clutch.
