@@ -729,38 +729,42 @@ local function computeTorqueCurve(m, n, p, q, M, b, x)
 end
 
 --Apply Power
-function Engine(dt)
-	local deltaTime = (60/(1/dt))
+function Engine(rawDeltaTime)
+	local dt = (60 / (1/rawDeltaTime))
 	
 	--Average Rotational Speed Calculation
-	local fwspeed=0
-	local fwcount=0
-	local rwspeed=0
-	local rwcount=0
+	local avgFWheelSpeed = 0
+	local fwcount = 0
+	local avgRWheelSpeed = 0
+	local rwcount = 0
 
-	for i,v in next, (car.Wheels:GetChildren()) do
-		if v.Name=="FL" or v.Name=="FR" or v.Name == "F" then
-			fwspeed=fwspeed+_WheelSpeeds[v.Name]
+	for _, wheel in car.Wheels:GetChildren() do
+		if wheel.Name == "FL" or wheel.Name == "FR" or wheel.Name == "F" then
+			avgFWheelSpeed = avgFWheelSpeed + _WheelSpeeds[wheel.Name]
 			fwcount=fwcount+1
-		elseif v.Name=="RL" or v.Name=="RR" or v.Name == "R" then
-			rwspeed=rwspeed+_WheelSpeeds[v.Name]
+		elseif wheel.Name == "RL" or wheel.Name == "RR" or wheel.Name == "R" then
+			avgRWheelSpeed = avgRWheelSpeed + _WheelSpeeds[wheel.Name]
 			rwcount=rwcount+1
 		end
 	end
-	fwspeed=fwspeed/fwcount
-	rwspeed=rwspeed/rwcount	
-	local cwspeed=(fwspeed+rwspeed)/2
 
-	local maxSpin=0
-	local maxCount=0
-	local revThrot=_GThrot
-	for i,v in next, (Drivetrain) do maxSpin = maxSpin + _WheelSpeeds[v.Name] maxCount = maxCount + 1 end
-	maxSpin=maxSpin/maxCount
-	local _WheelRPM = maxSpin*_CurrentRatio*finalDriveRatioRPM
+	avgFWheelSpeed=avgFWheelSpeed/fwcount
+	avgRWheelSpeed=avgRWheelSpeed/rwcount
+
+	local avgDrivetrainSpin = 0
+	local maxCount = 0
+	for _, v in Drivetrain do
+		avgDrivetrainSpin = avgDrivetrainSpin + _WheelSpeeds[v.Name]
+		maxCount = maxCount + 1
+	end
+	avgDrivetrainSpin = avgDrivetrainSpin / maxCount
+
+	local revThrot = _GThrot
+	local _WheelRPM = avgDrivetrainSpin*_CurrentRatio*finalDriveRatioRPM
 
 	--Update ratio
-	_CurrentRatio = TuneData.Ratios[CurrentGear+2]
-	_spLimit = (TuneData.Redline+100)/(finalDriveRatioRPM*_CurrentRatio)
+	_CurrentRatio = TuneData.Ratios[CurrentGear + 2]
+	_spLimit = (TuneData.Redline + 100) / (finalDriveRatioRPM * _CurrentRatio)
 	
 	--Neutral Gear
 	if (CurrentGear == 0 or isShifting) and _IsOn then 
@@ -769,31 +773,41 @@ function Engine(dt)
 		_StallOK = false
 	end
 	
-	_FlywheelEnergy = math.max(_FlywheelEnergy-TuneData.Flywheel, 0)
+	_FlywheelEnergy = math.max(
+		_FlywheelEnergy - TuneData.Flywheel,
+		0
+	)
+	
 	if _Clutch == 1 then
-		_FlywheelEnergy = math.max((RPM-_WheelRPM)/1000 * _GThrot * TuneData.FlywheelEnergy,0)
+		_FlywheelEnergy = math.max(
+			(RPM - _WheelRPM) / 1000 * _GThrot * TuneData.FlywheelEnergy,
+			0
+		)
 	end
 	
 	local revMin = 1
 	local goalMin = 1
-	local goalMax = TuneData.Redline+100
+	local goalMax = TuneData.Redline + 100
 	if TuneData.Stall and TuneData.Clutch then
 		revMin = 0
 	end
 	
-	if isShifting and ShiftUp then 
-		_GThrot = TuneData.IdleThrottle/100
+	if isShifting and ShiftUp then
+		_GThrot = TuneData.IdleThrottle / 100
 	elseif isShifting and ShiftDown then
-		_GThrot = (TuneData.ShiftThrot/100)
+		_GThrot = TuneData.ShiftThrot / 100
 	else
-		if (TuneData.AutoShiftVers == "Old" and CurrentGear==-1 and _TMode=="Auto") then
+		if TuneData.AutoShiftVers == "Old" and CurrentGear == -1 and _TMode == "Auto" then
 			_GThrot = _InBrake
 		else
-			_GThrot = math.max(_InThrot, TuneData.IdleThrottle/100)
+			_GThrot = math.max(
+				_InThrot,
+				TuneData.IdleThrottle / 100
+			)
 		end
 	end
 	
-	if (TuneData.AutoShiftVers == "Old" and CurrentGear==-1 and _TMode=="Auto") then
+	if TuneData.AutoShiftVers == "Old" and CurrentGear == -1 and _TMode == "Auto" then
 		_GBrake = _InThrot
 	else
 		_GBrake = _InBrake
@@ -812,32 +826,63 @@ function Engine(dt)
 			goalMax = TuneData.NeutralRevRPM
 		end
 	end
-	
+
 	--Determine RPM
 	-- Rev limiter/speed limiter
 	if RPM >= TuneData.Redline then
 		revLimiting = true
-	elseif RPM < TuneData.Redline-TuneData.RevBounce then
+	elseif RPM < TuneData.Redline - TuneData.RevBounce then
 		revLimiting = false
 	end
+
 	if revLimiting then
 		_GThrot = TuneData.IdleThrottle/100
 	end
 	
-	local limit = (CurrentGear<0 and TuneData.ReverseSpeed or TuneData.SpeedLimit)
+	local limit = (CurrentGear < 0 and TuneData.ReverseSpeed or TuneData.SpeedLimit)
 	if limit > 0 then
-		if car.DriveSeat.AssemblyLinearVelocity.Magnitude >= limit-TuneData.SLimitGradient then
-			_GThrot = math.max(math.min(_GThrot, math.max((limit-car.DriveSeat.AssemblyLinearVelocity.Magnitude/(Units.Velocity_mdivs/3.6))/TuneData.SLimitGradient,0)), TuneData.IdleThrottle/100)
+		local assemblySpeed = car.DriveSeat.AssemblyLinearVelocity.Magnitude
+		if assemblySpeed >= limit-TuneData.SLimitGradient then
+			_GThrot = math.max(
+				math.min(
+					_GThrot,
+					math.max(
+						(limit - assemblySpeed / (Units.Velocity_mdivs / 3.6)) / TuneData.SLimitGradient,
+						0
+					)
+				),
+				TuneData.IdleThrottle / 100
+			)
 		end
 	end
 
 	-- Idle
 	if RPM<TuneData.IdleRPM and _IsOn then
-		_GThrot = math.max(_GThrot, math.clamp((TuneData.IdleRPM-RPM)/400, 0, 1))
+		_GThrot = math.max(
+			_GThrot,
+			math.clamp(
+				(TuneData.IdleRPM - RPM) / 400,
+				0,
+				1
+			)
+		)
 	end
 	
 	if (TuneData.Engine or TuneData.Electric) and (not script.Parent.Starting.Value) then
-		_GoalRPM = math.clamp(RPM - (TuneData.RevDecay*deltaTime) + (TuneData.RevAccel*revThrot*Values.Torque.Value*deltaTime) - (math.clamp(math.max(RPM-TuneData.IdleRPM,0)/math.max(TuneData.Redline-TuneData.IdleRPM,1),0,1)*TuneData.RevDecayRPM*deltaTime),goalMin,goalMax)
+		local VAR1 = math.max(RPM - TuneData.IdleRPM, 0)
+		local VAR2 = math.max(TuneData.Redline - TuneData.IdleRPM, 1)
+
+		local VAR3 = math.clamp(
+			VAR1 / VAR2,
+			0,
+			1
+		) * TuneData.RevDecayRPM * dt
+
+		_GoalRPM = math.clamp(
+			RPM - (TuneData.RevDecay * dt) + (TuneData.RevAccel * revThrot * Values.Torque.Value * dt) - VAR3,
+			goalMin,
+			goalMax
+		)
 	end
 
 	--Starting
@@ -896,7 +941,7 @@ function Engine(dt)
 	end
 	
 	local aRPM = math.max(math.min((_GoalRPM*_Clutch) + (_WheelRPM*(1-_Clutch)),TuneData.Redline+100),revMin)
-	local clutchP = math.min(math.abs(aRPM-RPM)/(TuneData.Flywheel*deltaTime),.9)
+	local clutchP = math.min(math.abs(aRPM-RPM)/(TuneData.Flywheel*dt),.9)
 	if _ClPressing then
 		clutchP = 0
 	end
@@ -947,7 +992,7 @@ function Engine(dt)
 		if TuneData.Turbochargers > 0 then
 			local _TBoostGoal = TuneData.Turbochargers * _GThrot^3 * (TuneData.T_Boost - computeTorqueCurve(TuneData.IdleRPM/1000, TuneData.T_IdleBoost, TuneData.T_PeakRPM/1000, TuneData.T_Boost, TuneData.T_Boost, 1/TuneData.T_Curve, x))
 			if _TBoostGoal > _TBoost then
-				_TBoost = math.min(_TBoost + TuneData.T_SpoolIncrease * _GThrot * deltaTime, _TBoostGoal)
+				_TBoost = math.min(_TBoost + TuneData.T_SpoolIncrease * _GThrot * dt, _TBoostGoal)
 			elseif _TBoost > _TBoostGoal then
 				_TBoost = math.max(_TBoost * TuneData.T_SpoolDecrease, _TBoostGoal)
 			end
@@ -959,9 +1004,9 @@ function Engine(dt)
 			local SRedlineBoost = computeTorqueCurve(TuneData.S_PeakRPM/1000, TuneData.S_PeakBoost, TuneData.Redline/1000, TuneData.S_RedlineBoost, TuneData.S_PeakBoost, 1/TuneData.S_RedlineCurve, x)
 			local _SBoostGoal = TuneData.Superchargers * _GThrot * (TuneData.S_PeakBoost - SIdleBoost - SRedlineBoost)
 			if _SBoostGoal > _SBoost then
-				_SBoost = math.min(_SBoost + TuneData.S_PeakBoost*TuneData.S_Response*deltaTime, _SBoostGoal)
+				_SBoost = math.min(_SBoost + TuneData.S_PeakBoost*TuneData.S_Response*dt, _SBoostGoal)
 			elseif _SBoost > _SBoostGoal then
-				_SBoost = math.max(_SBoost - TuneData.S_PeakBoost*TuneData.S_Response*deltaTime, _SBoostGoal)
+				_SBoost = math.max(_SBoost - TuneData.S_PeakBoost*TuneData.S_Response*dt, _SBoostGoal)
 			end
 			STorque = _SBoost * TuneData.S_Efficiency
 			SuperHp, SuperTorque = (STorque*x)/5.252, STorque
