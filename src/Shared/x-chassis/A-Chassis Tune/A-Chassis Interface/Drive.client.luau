@@ -587,7 +587,6 @@ if not TuneData.Engine and TuneData.Electric then
 	TuneData.Clutch = false 
 	TuneData.IdleRPM = 0 
 	TuneData.IdleThrottle = 0
-	TuneData.AutoShiftType = "DCT" 
 	TuneData.ShiftUpTime = 0.1 
 	TuneData.ShiftDnTime = 0.1 
 end
@@ -667,16 +666,10 @@ function Gear()
 			return
 		end
 		
-		local NextGear = math.min(CurrentGear+3,#TuneData.Ratios)
-		
 		if _TMode ~= "Manual" then
 			isShifting = true
-			if CurrentGear>0 then 
-				if TuneData.AutoShiftType=="DCT" then 
-					wait(TuneData.ShiftUpTime)
-				elseif TuneData.AutoShiftType=="Rev" then
-					repeat wait() until RPM<=math.max(math.min(maxSpin*TuneData.Ratios[NextGear]*finalDriveRatioRPM,TuneData.Redline-TuneData.RevBounce),TuneData.IdleRPM+TuneData.ClutchIdle) or not _IsOn or ShiftDown 
-				end
+			if CurrentGear > 0 then 
+				task.wait(TuneData.ShiftUpTime)
 			end
 		end
 
@@ -687,27 +680,37 @@ function Gear()
 			return
 		end
 
-		CurrentGear = math.min(CurrentGear+1,#TuneData.Ratios-2)
-		if _TMode ~= "Manual" or (_TMode == "Manual" and CurrentGear == 1) and _IsOn then _ClPressing = false end
+		CurrentGear = math.min(CurrentGear + 1, #TuneData.Ratios - 2)
+		if _TMode ~= "Manual" or (_TMode == "Manual" and CurrentGear == 1) and _IsOn then
+			_ClPressing = false
+		end
 	end
+
 	if ShiftDown and not isShifting then
-		if (_TMode == "Manual" and not _ClPressing) or CurrentGear == -1 or (_TMode ~= "Manual" and not _IsOn) then ShiftDown = false return end
-		local PrevGear = math.min(CurrentGear+1,#TuneData.Ratios)
+		if (_TMode == "Manual" and not _ClPressing) or CurrentGear == -1 or (_TMode ~= "Manual" and not _IsOn) then
+			ShiftDown = false
+			return
+		end
+
 		if _TMode~="Manual" then
 			isShifting = true
-			if CurrentGear>1 then 
-				if TuneData.AutoShiftType=="DCT" then 
-					wait(TuneData.ShiftDnTime)
-				elseif TuneData.AutoShiftType=="Rev" then
-					repeat wait() until RPM>=math.max(math.min(maxSpin*TuneData.Ratios[PrevGear]*finalDriveRatioRPM,TuneData.Redline-TuneData.RevBounce),TuneData.IdleRPM+TuneData.ClutchIdle) or not _IsOn or ShiftUp
-				end
+			if CurrentGear > 1 then 
+				task.wait(TuneData.ShiftDnTime)
 			end
 		end
+
 		ShiftDown = false
 		isShifting = false
-		if _TMode ~= "Manual" and not _IsOn then return end
-		CurrentGear = math.max(CurrentGear-1,-1)
-		if _TMode ~= "Manual" or (_TMode == "Manual" and CurrentGear == -1) and _IsOn then _ClPressing = false end
+
+		if _TMode ~= "Manual" and not _IsOn then
+			return
+		end
+
+		CurrentGear = math.max(CurrentGear - 1, -1)
+
+		if _TMode ~= "Manual" or (_TMode == "Manual" and CurrentGear == -1) and _IsOn then
+			_ClPressing = false
+		end
 	end
 end
 

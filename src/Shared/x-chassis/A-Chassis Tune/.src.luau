@@ -283,10 +283,6 @@ do
 	Tune.LimitClutch	= false		-- Will also limit RPMs while the clutch is pressed down
 
 	--Automatic Settings
-	Tune.AutoShiftType	= "DCT"												--[[
-	[Types]
-		"Rev"		: Clutch engages fully once RPM reached			(AC6C V1)
-		"DCT"		: Clutch engages after a set time has passed	(AC6.81T)	]]
 	Tune.AutoShiftVers	= "New"												--[[
 	[Versions]
 		"New"		: Shift from Reverse, Neutral, and Drive		(AC6.81T)
