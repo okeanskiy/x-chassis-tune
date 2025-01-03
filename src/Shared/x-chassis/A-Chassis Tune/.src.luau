@@ -268,10 +268,6 @@ do
 	--Clutch: "Old" mode
 	Tune.ClutchRPMMult	= 1.0		-- Clutch RPM multiplier, recommended to leave at 1.0
 
-	--Torque Converter:
-	Tune.TQLock 		= false		-- Torque converter starts locking at a certain RPM
-	Tune.RPMEngage 		= 3500		-- Keeps RPMs to this level until passed
-
 	--Neutral Rev Limiter (Avxnturador)
 	Tune.NeutralLimit	= false		-- Enables a different redline RPM for when the car is in neutral
 	Tune.NeutralRevRPM	= 5000		-- The rev limiter when the car is in neutral
