@@ -272,11 +272,6 @@ do
 	Tune.TQLock 		= false		-- Torque converter starts locking at a certain RPM
 	Tune.RPMEngage 		= 3500		-- Keeps RPMs to this level until passed
 
-	--CVT:
-	Tune.CVTRPM			= 7000		-- RPM that the CVT wants to keep at full throttle.
-	Tune.CVTMaxRatio	= 6			-- The gear ratio that the CVT cannot go over.
-	Tune.CVTMinRatio	= 1			-- The gear ratio that the CVT cannot go under.
-
 	--Neutral Rev Limiter (Avxnturador)
 	Tune.NeutralLimit	= false		-- Enables a different redline RPM for when the car is in neutral
 	Tune.NeutralRevRPM	= 5000		-- The rev limiter when the car is in neutral

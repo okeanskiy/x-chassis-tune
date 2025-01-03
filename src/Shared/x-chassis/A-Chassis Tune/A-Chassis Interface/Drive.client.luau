@@ -80,7 +80,6 @@ local SuperTorque = 0
 local BoostedHP = 0
 local BoostedTorque = 0
 
-local _CVTRatio = TuneData.CVTMaxRatio
 local _CurrentRatio = TuneData.Ratios[CurrentGear+2]
 local _FlywheelEnergy = 0
 
