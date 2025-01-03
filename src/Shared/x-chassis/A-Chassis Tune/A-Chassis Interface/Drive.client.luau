@@ -33,8 +33,6 @@ local RSteerOuter = TuneData.RSteerOuter
 local RSteerInner = TuneData.RSteerInner
 
 local boolToNum = {[true] = 1, [false] = 0}
-local min = math.min
-local max = math.max
 
 local _IsOn = TuneData.AutoStart
 if TuneData.AutoStart and (TuneData.Engine or TuneData.Electric) then
@@ -368,25 +366,37 @@ function DealWithMobileInput()
 	local mobile = script.Parent.Mobile
 	
 	mobile.Jump.InputBegan:Connect(function(input)
-		if input.UserInputType ~= Enum.UserInputType.Touch then return end
+		if input.UserInputType ~= Enum.UserInputType.Touch then
+			return
+		end
+		
 		player.Character:FindFirstChildWhichIsA("Humanoid").Jump = true
 	end)
 	
 	mobile.ModeSwitch.MouseButton1Click:Connect(function()
-		_MobileMode = _MobileModes[(table.find(_MobileModes, _MobileMode) or 0) + 1]
+		local mobileModeKey = (table.find(_MobileModes, _MobileMode) or 0) + 1
+
+		_MobileMode = _MobileModes[mobileModeKey]
 		if not _MobileMode then
 			_MobileMode = _MobileModes[1]
 		end
 	end)
 	
 	-- Tap
-	for _, button in next, mobile.Tap:GetChildren() do
-		if not button:IsA("ImageButton") then continue end
+	for _, button in mobile.Tap:GetChildren() do
+		if not button:IsA("ImageButton") then
+			continue
+		end
+
 		button.InputBegan:Connect(function(input)
-			if input.UserInputType ~= Enum.UserInputType.Touch then return end
+			if input.UserInputType ~= Enum.UserInputType.Touch then
+				return
+			end
+
 			button.ImageColor3 = Color3.fromRGB(178,178,178)
 			button.ImageLabel.ImageColor3 = Color3.new(0,0,0)
 			button.ImageLabel.ImageTransparency = .5
+
 			if button.Name == "Throttle" then
 				_IThrot = 1
 			elseif button.Name == "Brake" then
@@ -399,11 +409,16 @@ function DealWithMobileInput()
 				_SteerR = true
 			end
 		end)
+
 		button.InputEnded:Connect(function(input)
-			if input.UserInputType ~= Enum.UserInputType.Touch then return end
+			if input.UserInputType ~= Enum.UserInputType.Touch then
+				return
+			end
+
 			button.ImageColor3 = Color3.new(0, 0, 0)
 			button.ImageLabel.ImageColor3 = Color3.new(1,1,1)
 			button.ImageLabel.ImageTransparency = .8
+
 			if button.Name == "Throttle" then
 				_IThrot = 0
 			elseif button.Name == "Brake" then
@@ -427,18 +442,28 @@ function DealWithMobileInput()
 	end
 	
 	-- Tilt
-	for _, button in next, mobile.Tilt:GetChildren() do
-		if not button:IsA("TextButton") then continue end
+	for _, button in mobile.Tilt:GetChildren() do
+		if not button:IsA("TextButton") then
+			continue
+		end
+
 		button.InputBegan:Connect(function(input)
-			if input.UserInputType ~= Enum.UserInputType.Touch then return end
+			if input.UserInputType ~= Enum.UserInputType.Touch then
+				return
+			end
+
 			if button.Name == "Throttle" then
 				_IThrot = 1
 			elseif button.Name == "Brake" then
 				_IBrake = 1
 			end
 		end)
+
 		button.InputEnded:Connect(function(input)
-			if input.UserInputType ~= Enum.UserInputType.Touch then return end
+			if input.UserInputType ~= Enum.UserInputType.Touch then
+				return
+			end
+
 			if button.Name == "Throttle" then
 				_IThrot = 0
 			elseif button.Name == "Brake" then
@@ -446,14 +471,20 @@ function DealWithMobileInput()
 			end
 		end)
 	end
+
 	if UserInputService.GyroscopeEnabled then
 		UserInputService.DeviceRotationChanged:Connect(function(rotation, cframe)
 			if _MobileMode == "Tilt" then
-				_GSteerT = -math.clamp(rotation.Position.Z*2, -1, 1)
+				_GSteerT = -math.clamp(
+					rotation.Position.Z*2,
+					-1,
+					1
+				)
 			end
 		end)
 	end
 end
+
 DealWithMobileInput()
 
 --[[Drivetrain Initialize]]
