@@ -116,7 +116,6 @@ local _WheelSpeeds = {}
 local _OldVelocity = Vector3.new()
 
 local _CarCenter = CFrame.new()
-local autoshiftvers = TuneData.AutoShiftVers
 
 local _DragFactor = 1
 
@@ -184,142 +183,183 @@ end
 Values.AutoClutch.Value = true
 
 --Input Handler
-function DealWithInput(input,IsRobloxFunction)
-	if (UserInputService:GetFocusedTextBox()==nil) and not _InControls then --Ignore when UI Focus
-		--Shift Down [Manual Transmission]
-		if (input.KeyCode ==_CTRL["ContlrShiftDown"] or (_MSteer and input.KeyCode==_CTRL["MouseShiftDown"]) or ((not _MSteer) and input.KeyCode==_CTRL["ShiftDown"])) and ((_IsOn and ((_TMode=="Auto" and CurrentGear<=1) and TuneData.AutoShiftVers == "New") or _TMode=="Semi") or _TMode=="Manual") and input.UserInputState == Enum.UserInputState.Begin then
-			if not ShiftDown then ShiftDown = true end
-			
-		--Shift Up [Manual Transmission]
-		elseif (input.KeyCode ==_CTRL["ContlrShiftUp"] or (_MSteer and input.KeyCode==_CTRL["MouseShiftUp"]) or ((not _MSteer) and input.KeyCode==_CTRL["ShiftUp"])) and ((_IsOn and ((_TMode=="Auto" and CurrentGear<1) and TuneData.AutoShiftVers == "New") or _TMode=="Semi") or _TMode=="Manual") and input.UserInputState == Enum.UserInputState.Begin then
-			if not ShiftUp then ShiftUp = true end
-			
-		--Toggle Clutch
-		elseif (input.KeyCode ==_CTRL["ContlrClutch"] or (_MSteer and input.KeyCode==_CTRL["MouseClutch"]) or ((not _MSteer) and input.KeyCode==_CTRL["Clutch"])) and _TMode=="Manual" then
-			if input.UserInputState == Enum.UserInputState.Begin then
-				_ClPressing = true
-				_PlayerClutch = true
-			elseif input.UserInputState == Enum.UserInputState.End then
-				_ClPressing = false
-				_PlayerClutch = false
-			end
-			
-		--Toggle PBrake
-		elseif input.KeyCode ==_CTRL["ContlrPBrake"] or (_MSteer and input.KeyCode==_CTRL["MousePBrake"]) or ((not _MSteer) and input.KeyCode==_CTRL["PBrake"]) or ((not _MSteer) and input.KeyCode==_CTRL["PBrake2"]) then
-			if input.UserInputState == Enum.UserInputState.Begin then
-				_PBrake = not _PBrake
-			elseif input.UserInputState == Enum.UserInputState.End then
-				if car.DriveSeat.AssemblyLinearVelocity.Magnitude>5 then _PBrake = false end
-			end
-			
-		--Toggle Transmission Mode
-		elseif (input.KeyCode == _CTRL["ContlrToggleTMode"] or input.KeyCode==_CTRL["ToggleTransMode"]) and input.UserInputState == Enum.UserInputState.Begin then
-			local n=1
-			for i,v in next, (TuneData.TransModes) do
-				if v==_TMode then n=i break end
-			end
-			n=n+1
-			if n>#TuneData.TransModes then n=1 end
-			_TMode = TuneData.TransModes[n]
-			
-		--Throttle
-		elseif ((not _MSteer) and (input.KeyCode==_CTRL["Throttle"] or input.KeyCode == _CTRL["Throttle2"])) or ((((_CTRL["MouseThrottle"]==Enum.UserInputType.MouseButton1 or _CTRL["MouseThrottle"]==Enum.UserInputType.MouseButton2) and input.UserInputType == _CTRL["MouseThrottle"]) or input.KeyCode == _CTRL["MouseThrottle"])and _MSteer) then
-			if input.UserInputState == Enum.UserInputState.Begin then
-				_IThrot = 1
-			else
-				_IThrot = 0
-			end
-			
-		--Brake
-		elseif ((not _MSteer) and (input.KeyCode==_CTRL["Brake"] or input.KeyCode == _CTRL["Brake2"])) or ((((_CTRL["MouseBrake"]==Enum.UserInputType.MouseButton1 or _CTRL["MouseBrake"]==Enum.UserInputType.MouseButton2) and input.UserInputType == _CTRL["MouseBrake"]) or input.KeyCode == _CTRL["MouseBrake"])and _MSteer) then
-			if input.UserInputState == Enum.UserInputState.Begin then
-				_IBrake = 1
-			else
-				_IBrake = 0
-			end
-			
-		--Steer Left
-		elseif (not _MSteer) and (input.KeyCode==_CTRL["SteerLeft"] or input.KeyCode == _CTRL["SteerLeft2"]) then
-			if input.UserInputState == Enum.UserInputState.Begin then
-				_GSteerT = -1
-				_SteerL = true
-			else
-				if _SteerR then
-					_GSteerT = 1
-				else
-					_GSteerT = 0
-				end
-				_SteerL = false
-			end
-			
-		--Steer Right
-		elseif (not _MSteer) and (input.KeyCode==_CTRL["SteerRight"] or input.KeyCode == _CTRL["SteerRight2"]) then
-			if input.UserInputState == Enum.UserInputState.Begin then
-				_GSteerT = 1
-				_SteerR = true
-			else
-				if _SteerL then
-					_GSteerT = -1
-				else
-					_GSteerT = 0
-				end
-				_SteerR = false
-			end
-			
-		--Toggle Mouse Controls
-		elseif input.KeyCode ==_CTRL["ToggleMouseDrive"] then
-			if input.UserInputState == Enum.UserInputState.End then
-				_MSteer = not _MSteer
-				_IThrot = 0
-				_IBrake = 0
-				_GSteerT = 0
-			end
-			
-		--Toggle TCS
-		elseif TuneData.TCSEnabled and _IsOn and input.KeyCode == _CTRL["ToggleTCS"] or input.KeyCode == _CTRL["ContlrToggleTCS"] then
-			if input.UserInputState == Enum.UserInputState.End then _TCS = not _TCS end
-		
-		--Toggle ABS
-		elseif TuneData.ABSEnabled and _IsOn and input.KeyCode == _CTRL["ToggleABS"] or input.KeyCode == _CTRL["ContlrToggleABS"] then
-			if input.UserInputState == Enum.UserInputState.End then _ABS = not _ABS end
-			
-		end
-		
-		--Variable Controls
-		if input.UserInputType.Name:find("Gamepad") then
-			--Gamepad Steering
-			if input.KeyCode == _CTRL["ContlrSteer"] then
-				if input.Position.X>= 0 then
-					local cDZone = math.min(.99,TuneData.Peripherals.ControlRDZone/100)
-					if math.abs(input.Position.X)>cDZone then
-						_GSteerT = (input.Position.X-cDZone)/(1-cDZone)
-					else
-						_GSteerT = 0
-					end
-				else
-					local cDZone = math.min(.99,TuneData.Peripherals.ControlLDZone/100)
-					if math.abs(input.Position.X)>cDZone then
-						_GSteerT = (input.Position.X+cDZone)/(1-cDZone)
-					else
-						_GSteerT = 0
-					end
-				end
-				
-			--Gamepad Throttle
-			elseif input.KeyCode == _CTRL["ContlrThrottle"] then
-				_IThrot = math.max(0,input.Position.Z)
-				
-			--Gamepad Brake
-			elseif input.KeyCode == _CTRL["ContlrBrake"] then
-				_IBrake = input.Position.Z
-			end
-		end
-	else
+function DealWithInput(input, gameProcessedEvent)
+	-- if gameProcessedEvent then
+	-- 	return
+	-- end
+
+	if (UserInputService:GetFocusedTextBox() ~= nil) or _InControls then
 		_IThrot = 0
 		_GSteerT = 0
 		_IBrake = 0
+		return
+	end
+
+	local assemblySpeed = car.DriveSeat.AssemblyLinearVelocity.Magnitude
+
+	local inputShiftDown = input.KeyCode == _CTRL["ContlrShiftDown"] or (_MSteer and input.KeyCode == _CTRL["MouseShiftDown"]) or (not _MSteer and input.KeyCode == _CTRL["ShiftDown"])
+	local isDownshiftable = (_IsOn and ((_TMode == "Auto" and CurrentGear <= 1) and TuneData.AutoShiftVers == "New") or _TMode == "Semi") or _TMode == "Manual"
+
+	local inputShiftUp = input.KeyCode == _CTRL["ContlrShiftUp"] or (_MSteer and input.KeyCode == _CTRL["MouseShiftUp"]) or (not _MSteer and input.KeyCode == _CTRL["ShiftUp"])
+	local isUpshiftable = (_IsOn and ((_TMode == "Auto" and CurrentGear < 1) and TuneData.AutoShiftVers == "New") or _TMode == "Semi") or _TMode == "Manual"
+
+	local inputClutch = input.KeyCode == _CTRL["ContlrClutch"] or (_MSteer and input.KeyCode == _CTRL["MouseClutch"]) or (not _MSteer and input.KeyCode == _CTRL["Clutch"])
+
+	local inputPBrake = input.KeyCode == _CTRL["ContlrPBrake"] or (_MSteer and input.KeyCode == _CTRL["MousePBrake"]) or (not _MSteer and input.KeyCode == _CTRL["PBrake"]) or (not _MSteer and input.KeyCode == _CTRL["PBrake2"])
+
+	local inputChangeTransmissionMode = input.KeyCode == _CTRL["ContlrToggleTMode"] or input.KeyCode == _CTRL["ToggleTransMode"]
+
+	local inputThrottle = (not _MSteer and (input.KeyCode == _CTRL["Throttle"] or input.KeyCode == _CTRL["Throttle2"])) or ((((_CTRL["MouseThrottle"] == Enum.UserInputType.MouseButton1 or _CTRL["MouseThrottle"] == Enum.UserInputType.MouseButton2) and input.UserInputType == _CTRL["MouseThrottle"]) or input.KeyCode == _CTRL["MouseThrottle"])and _MSteer)
+
+	local inputBrake = (not _MSteer and (input.KeyCode == _CTRL["Brake"] or input.KeyCode == _CTRL["Brake2"])) or ((((_CTRL["MouseBrake"] == Enum.UserInputType.MouseButton1 or _CTRL["MouseBrake"] == Enum.UserInputType.MouseButton2) and input.UserInputType == _CTRL["MouseBrake"]) or input.KeyCode == _CTRL["MouseBrake"]) and _MSteer)
+
+	local inputSteerLeft = not _MSteer and (input.KeyCode == _CTRL["SteerLeft"] or input.KeyCode == _CTRL["SteerLeft2"])
+	local inputSteerRight = not _MSteer and (input.KeyCode == _CTRL["SteerRight"] or input.KeyCode == _CTRL["SteerRight2"])
+
+	local inputToggleTCS = TuneData.TCSEnabled and _IsOn and input.KeyCode == _CTRL["ToggleTCS"] or input.KeyCode == _CTRL["ContlrToggleTCS"]
+	local inputToggleABS = TuneData.ABSEnabled and _IsOn and input.KeyCode == _CTRL["ToggleABS"] or input.KeyCode == _CTRL["ContlrToggleABS"]
+
+	if inputShiftDown and isDownshiftable and input.UserInputState == Enum.UserInputState.Begin then
+
+		if not ShiftDown then
+			ShiftDown = true
+		end
+
+	elseif inputShiftUp and isUpshiftable and input.UserInputState == Enum.UserInputState.Begin then
+
+		if not ShiftUp then
+			ShiftUp = true
+		end
+
+	elseif inputClutch and _TMode == "Manual" then
+
+		if input.UserInputState == Enum.UserInputState.Begin then
+			_ClPressing = true
+			_PlayerClutch = true
+		elseif input.UserInputState == Enum.UserInputState.End then
+			_ClPressing = false
+			_PlayerClutch = false
+		end
+
+	elseif inputPBrake then
+
+		if input.UserInputState == Enum.UserInputState.Begin then
+			_PBrake = not _PBrake
+		elseif input.UserInputState == Enum.UserInputState.End then
+			if assemblySpeed > 5 then
+				_PBrake = false
+			end
+		end
+
+	elseif inputChangeTransmissionMode and input.UserInputState == Enum.UserInputState.Begin then
+		local n = 1
+
+		for i, v in TuneData.TransModes do
+			if v == _TMode then
+				n = i
+				break
+			end
+		end
+
+		n = n + 1
+
+		if n > #TuneData.TransModes then
+			n = 1
+		end
+
+		_TMode = TuneData.TransModes[n]
+
+	elseif inputThrottle then
+		if input.UserInputState == Enum.UserInputState.Begin then
+			_IThrot = 1
+		else
+			_IThrot = 0
+		end
+
+	elseif inputBrake then
+		if input.UserInputState == Enum.UserInputState.Begin then
+			_IBrake = 1
+		else
+			_IBrake = 0
+		end
+
+	elseif inputSteerLeft then
+		if input.UserInputState == Enum.UserInputState.Begin then
+			_GSteerT = -1
+			_SteerL = true
+		else
+			if _SteerR then
+				_GSteerT = 1
+			else
+				_GSteerT = 0
+			end
+			_SteerL = false
+		end
+
+	elseif inputSteerRight then
+		if input.UserInputState == Enum.UserInputState.Begin then
+			_GSteerT = 1
+			_SteerR = true
+		else
+			if _SteerL then
+				_GSteerT = -1
+			else
+				_GSteerT = 0
+			end
+			_SteerR = false
+		end
+
+	elseif input.KeyCode == _CTRL["ToggleMouseDrive"] then
+		if input.UserInputState == Enum.UserInputState.End then
+			_MSteer = not _MSteer
+			_IThrot = 0
+			_IBrake = 0
+			_GSteerT = 0
+		end
+
+	elseif inputToggleTCS then
+		if input.UserInputState == Enum.UserInputState.End then
+			_TCS = not _TCS
+		end
+
+	elseif inputToggleABS then
+		if input.UserInputState == Enum.UserInputState.End then
+			_ABS = not _ABS
+		end
+		
+	end
+	
+	--Variable Controls
+	if input.UserInputType.Name:find("Gamepad") then
+		--Gamepad Steering
+		if input.KeyCode == _CTRL["ContlrSteer"] then
+			if input.Position.X >= 0 then
+				local cDZone = math.min(.99, TuneData.Peripherals.ControlRDZone / 100)
+				if math.abs(input.Position.X) > cDZone then
+					_GSteerT = (input.Position.X - cDZone) / (1 - cDZone)
+				else
+					_GSteerT = 0
+				end
+			else
+				local cDZone = math.min(.99, TuneData.Peripherals.ControlLDZone / 100)
+				if math.abs(input.Position.X) > cDZone then
+					_GSteerT = (input.Position.X + cDZone) / (1 - cDZone)
+				else
+					_GSteerT = 0
+				end
+			end
+			
+		--Gamepad Throttle
+		elseif input.KeyCode == _CTRL["ContlrThrottle"] then
+			_IThrot = math.max(0,input.Position.Z)
+			
+		--Gamepad Brake
+		elseif input.KeyCode == _CTRL["ContlrBrake"] then
+			_IBrake = input.Position.Z
+		end
 	end
 end
+
 UserInputService.InputBegan:connect(DealWithInput)
 UserInputService.InputChanged:connect(DealWithInput)
 UserInputService.InputEnded:connect(DealWithInput)
@@ -1222,6 +1262,8 @@ end
 local ver = "1.6.4"
 print("A-Chassis, Version "..ver)
 
+local originalAutoShiftVers = TuneData.AutoShiftVers
+
 --Runtime Loops
 game:GetService("RunService").Heartbeat:connect(function(dt)
 	--Update Internal Values
@@ -1368,7 +1410,7 @@ game:GetService("RunService").Heartbeat:connect(function(dt)
 		TuneData.AutoShiftVers = "Old"
 		_TMode = "Auto"
 	else
-		TuneData.AutoShiftVers = autoshiftvers
+		TuneData.AutoShiftVers = originalAutoShiftVers
 	end
 	for _, v in next, script.Parent.Mobile:GetChildren() do
 		if v.ClassName ~= "Frame" then continue end
