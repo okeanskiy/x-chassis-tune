@@ -49,7 +49,7 @@ local _InBrake=0
 local _IBrake=0
 
 local _GClutch = 0
-local _ClPressing = false
+local ClutchPressing = false
 local _PlayerClutch = false
 local _Clutch = 0
 local _ClutchKick = 0
@@ -177,8 +177,6 @@ function GetCarCenter()
 	return center
 end
 
-Values.AutoClutch.Value = true
-
 --Input Handler
 function DealWithInput(input, gameProcessedEvent)
 	-- if gameProcessedEvent then
@@ -231,10 +229,10 @@ function DealWithInput(input, gameProcessedEvent)
 	elseif inputClutch and _TMode == "Manual" then
 
 		if input.UserInputState == Enum.UserInputState.Begin then
-			_ClPressing = true
+			ClutchPressing = true
 			_PlayerClutch = true
 		elseif input.UserInputState == Enum.UserInputState.End then
-			_ClPressing = false
+			ClutchPressing = false
 			_PlayerClutch = false
 		end
 
@@ -676,20 +674,20 @@ function Auto()
 
 	if isLegacyShiftVersion and CurrentGear == 0 then
 		CurrentGear = 1
-		_ClPressing = false
+		ClutchPressing = false
 	end
 
 	if CurrentGear <= 0 then
 		if _InThrot > 0 and isLowSpeed and isLegacyShiftVersion then
 			CurrentGear = 1
-			_ClPressing = false
+			ClutchPressing = false
 		end
 	end
 
 	if CurrentGear >= 1 then
 		if isLegacyShiftVersion and CurrentGear == 1 and _InBrake > 0 and isLowSpeed then
 			CurrentGear = -1
-			_ClPressing = false
+			ClutchPressing = false
 			return
 		end
 
@@ -722,7 +720,7 @@ function Gear()
 	end
 
 	if ShiftUp and not isShifting then
-		if _TMode == "Manual" and not _ClPressing then
+		if _TMode == "Manual" and not ClutchPressing then
 			ShiftUp = false 
 			return
 		end
@@ -752,12 +750,12 @@ function Gear()
 
 		CurrentGear = math.min(CurrentGear + 1, #TuneData.Ratios - 2)
 		if _TMode ~= "Manual" or (_TMode == "Manual" and CurrentGear == 1) and _IsOn then
-			_ClPressing = false
+			ClutchPressing = false
 		end
 	end
 
 	if ShiftDown and not isShifting then
-		if (_TMode == "Manual" and not _ClPressing) or CurrentGear == -1 or (_TMode ~= "Manual" and not _IsOn) then
+		if (_TMode == "Manual" and not ClutchPressing) or CurrentGear == -1 or (_TMode ~= "Manual" and not _IsOn) then
 			ShiftDown = false
 			return
 		end
@@ -779,7 +777,7 @@ function Gear()
 		CurrentGear = math.max(CurrentGear - 1, -1)
 
 		if _TMode ~= "Manual" or (_TMode == "Manual" and CurrentGear == -1) and _IsOn then
-			_ClPressing = false
+			ClutchPressing = false
 		end
 	end
 end
@@ -838,7 +836,7 @@ function Engine(rawDeltaTime)
 	
 	--Neutral Gear
 	if (CurrentGear == 0 or isShifting) and _IsOn then 
-		_ClPressing = true
+		ClutchPressing = true
 		_Clutch = 1
 		_StallOK = false
 	end
@@ -891,7 +889,7 @@ function Engine(rawDeltaTime)
 		end
 	end
 	
-	if ((_ClPressing and CurrentGear == 0) or (_PlayerClutch and CurrentGear ~= 0)) and TuneData.NeutralLimit then
+	if ((ClutchPressing and CurrentGear == 0) or (_PlayerClutch and CurrentGear ~= 0)) and TuneData.NeutralLimit then
 		if (CurrentGear == 0 and not TuneData.LimitClutch) or TuneData.LimitClutch then
 			goalMax = TuneData.NeutralRevRPM
 		end
@@ -927,7 +925,7 @@ function Engine(rawDeltaTime)
 	end
 
 	-- Idle
-	if RPM<TuneData.IdleRPM and _IsOn then
+	if RPM < TuneData.IdleRPM and _IsOn then
 		_GThrot = math.max(
 			_GThrot,
 			math.clamp(
@@ -939,17 +937,17 @@ function Engine(rawDeltaTime)
 	end
 	
 	if (TuneData.Engine or TuneData.Electric) and (not script.Parent.Starting.Value) then
-		local VAR1 = math.max(RPM - TuneData.IdleRPM, 0)
-		local VAR2 = math.max(TuneData.Redline - TuneData.IdleRPM, 1)
+		local rpmAboveIdle = math.max(RPM - TuneData.IdleRPM, 0)
+		local idleToRedlineRange = math.max(TuneData.Redline - TuneData.IdleRPM, 1)
 
-		local VAR3 = math.clamp(
-			VAR1 / VAR2,
+		local revDecayAdjustment = math.clamp(
+			rpmAboveIdle / idleToRedlineRange,
 			0,
 			1
 		) * TuneData.RevDecayRPM * dt
 
 		_GoalRPM = math.clamp(
-			RPM - (TuneData.RevDecay * dt) + (TuneData.RevAccel * revThrot * Values.Torque.Value * dt) - VAR3,
+			RPM - (TuneData.RevDecay * dt) + (TuneData.RevAccel * revThrot * Values.Torque.Value * dt) - revDecayAdjustment,
 			goalMin,
 			goalMax
 		)
@@ -968,22 +966,26 @@ function Engine(rawDeltaTime)
 	end
 	
 	if TuneData.Clutch then
-		if Values.AutoClutch and _IsOn then
-			if _ClPressing then
+		if _IsOn then
+			if ClutchPressing then
 				_ClutchKick = 1
 			end
 
-			_ClutchKick = _ClutchKick*(TuneData.ClutchEngage/100)		
+			_ClutchKick = _ClutchKick * (TuneData.ClutchEngage / 100)		
 			
-			local ClRPMInfluence = math.max((RPM)*TuneData.ClutchRPMMult/(TuneData.Redline),0)
+			local ClRPMInfluence = math.max(RPM * TuneData.ClutchRPMMult / TuneData.Redline, 0)
 			
 			if TuneData.ClutchMode == "New" then
 				ClRPMInfluence = 0
 			end
 			
-			_ClutchModulate = math.min(((((script.Parent.Values.Velocity.Value.Magnitude/(Units.Velocity_mdivs/3.6)/TuneData.SpeedEngage)/math.abs(CurrentGear)) + ClRPMInfluence) - _ClutchKick), 1)
+			local assemblySpeed = script.Parent.Values.Velocity.Value.Magnitude
+			_ClutchModulate = math.min(
+				assemblySpeed / (Units.Velocity_mdivs / 3.6) / TuneData.SpeedEngage / math.abs(CurrentGear) + ClRPMInfluence - _ClutchKick,
+				1
+			)
 
-			if not _ClPressing then
+			if not ClutchPressing then
 				_Clutch = math.min(1 - _ClutchModulate, 1)
 			else
 				_Clutch = 1
@@ -996,7 +998,7 @@ function Engine(rawDeltaTime)
 		end
 	else
 		_StallOK = false
-		if not _ClPressing and not isShifting then
+		if not ClutchPressing and not isShifting then
 			_Clutch = 0
 		else
 			_Clutch = 1
@@ -1012,7 +1014,7 @@ function Engine(rawDeltaTime)
 	
 	local aRPM = math.max(math.min((_GoalRPM*_Clutch) + (_WheelRPM*(1-_Clutch)),TuneData.Redline+100),revMin)
 	local clutchP = math.min(math.abs(aRPM-RPM)/(TuneData.Flywheel*dt),.9)
-	if _ClPressing then
+	if ClutchPressing then
 		clutchP = 0
 	end
 	RPM = RPM * clutchP + aRPM * (1 - clutchP)
@@ -1164,7 +1166,7 @@ function Engine(rawDeltaTime)
 		local throt = _GThrot
 		local brake = _GBrake
 		local clutch=1
-		if _ClPressing then
+		if ClutchPressing then
 			clutch = 0
 		end
 		if RPM < TuneData.IdleRPM then
@@ -1304,9 +1306,7 @@ game:GetService("RunService").Heartbeat:connect(function(dt)
 	
 	--Update External Values
 	-- Transmission
-	if Values.AutoClutch.Value then
-		Values.Clutch.Value = _Clutch
-	end
+	Values.Clutch.Value = _Clutch
 	Values.Gear.Value = CurrentGear
 	Values.TransmissionMode.Value = _TMode
 	Values.CurrentRatio.Value = _CurrentRatio
