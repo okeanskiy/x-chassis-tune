@@ -221,11 +221,6 @@ do
 			eg: {"Semi"} or {"Auto", "Manual"}								
 	>First mode is default mode													]]
 
-	Tune.ClutchMode		= "New"												--[[
-	[Modes]
-		"New"		: Speed controls clutch engagement			(AC6C V1.2)
-		"Old"		: Speed and RPM control clutch engagement	(AC6C V1.1)		]]
-
 --[[Transmission]]
 	--Transmission Settings
 	Tune.Stall			= true		-- Stalling, enables the car to stall. An ignition plugin would be necessary. Disables if Tune.Clutch is false.

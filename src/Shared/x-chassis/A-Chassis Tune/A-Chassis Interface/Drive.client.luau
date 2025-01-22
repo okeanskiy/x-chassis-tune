@@ -942,16 +942,9 @@ function Engine(rawDeltaTime)
 
 			_ClutchKick = _ClutchKick * (TuneData.ClutchEngage / 100)
 
-			local ClRPMInfluence = math.max(RPM * TuneData.ClutchRPMMult / TuneData.Redline, 0)
-
-			if TuneData.ClutchMode == "New" then
-				ClRPMInfluence = 0
-			end
-
 			local assemblySpeed = script.Parent.Values.Velocity.Value.Magnitude
 			_ClutchModulate = math.min(
 				assemblySpeed / (Units.Velocity_mdivs / 3.6) / TuneData.SpeedEngage / math.abs(CurrentGear)
-					+ ClRPMInfluence
 					- _ClutchKick,
 				1
 			)

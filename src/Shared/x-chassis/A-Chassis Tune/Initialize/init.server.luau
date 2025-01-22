@@ -160,7 +160,7 @@ for _, wheel in Drive do
 
 	--[[Chassis Assembly]]
 	--Create Steering Axle
-	local arm = Instance.new("Part", wheel)
+	local arm = Instance.new("Part")
 	arm.Name = "Arm"
 	arm.Anchored = true
 	arm.CanCollide = false
@@ -171,6 +171,7 @@ for _, wheel in Drive do
 	arm.TopSurface = Enum.SurfaceType.Smooth
 	arm.BottomSurface = Enum.SurfaceType.Smooth
 	arm.Transparency = 1
+	arm.Parent = wheel
 
 	--Create Wheel Spindle
 	local base = arm:Clone()
@@ -213,38 +214,38 @@ for _, wheel in Drive do
 			MakeWeld(SuspensionGeometry.SpringTop, car.DriveSeat)
 		end
 
-		local susparts = SuspensionGeometry:GetDescendants()
-		for _, p in pairs(susparts) do
-			if p:IsA("Part") then
-				p.CustomPhysicalProperties =
+		local suspensionDescendants = SuspensionGeometry:GetDescendants()
+		for _, desc in pairs(suspensionDescendants) do
+			if desc:IsA("Part") then
+				desc.CustomPhysicalProperties =
 					PhysicalProperties.new(math.clamp(_Tune.CustomSuspensionDensity, 0.01, 100), 0, 0, 0, 0)
-				p.Massless = _Tune.CustomSuspensionDensity <= 0
+				desc.Massless = _Tune.CustomSuspensionDensity <= 0
 			end
 		end
 
 		if _Tune.SusVisible == true then
-			for _, p in pairs(susparts) do
-				if p:IsA("Part") then
-					p.Transparency = 0.5
-				elseif p:IsA("SpringConstraint") or p:IsA("HingeConstraint") or p:IsA("BallSocketConstraint") then
-					p.Visible = true
+			for _, desc in suspensionDescendants do
+				if desc:IsA("Part") then
+					desc.Transparency = 0.5
+				elseif desc:IsA("SpringConstraint") or desc:IsA("HingeConstraint") or desc:IsA("BallSocketConstraint") then
+					desc.Visible = true
 				end
 			end
 		else
-			for _, p in pairs(susparts) do
-				if p:IsA("Part") then
-					p.Transparency = 1
-				elseif p:IsA("SpringConstraint") or p:IsA("HingeConstraint") or p:IsA("BallSocketConstraint") then
-					p.Visible = false
+			for _, desc in suspensionDescendants do
+				if desc:IsA("Part") then
+					desc.Transparency = 1
+				elseif desc:IsA("SpringConstraint") or desc:IsA("HingeConstraint") or desc:IsA("BallSocketConstraint") then
+					desc.Visible = false
 				end
 			end
 		end
 
-		local g = Instance.new("BodyGyro")
-		g.Name = "Stabilizer"
-		g.MaxTorque = Vector3.new(0, 0, 1)
-		g.P = 0
-		g.Parent = SuspensionGeometry.Hub
+		local stabilizerGyro = Instance.new("BodyGyro")
+		stabilizerGyro.Name = "Stabilizer"
+		stabilizerGyro.MaxTorque = Vector3.new(0, 0, 1)
+		stabilizerGyro.P = 0
+		stabilizerGyro.Parent = SuspensionGeometry.Hub
 
 		local sp = SuspensionGeometry:FindFirstChild("Spring")
 		sp.LimitsEnabled = true
@@ -256,7 +257,7 @@ for _, wheel in Drive do
 
 		local swayBar = SuspensionGeometry:FindFirstChild("SwayBar")
 		if wheel.Name == "FL" or wheel.Name == "FR" or wheel.Name == "F" then
-			g.D = _Tune.FGyroDampening
+			stabilizerGyro.D = _Tune.FGyroDampening
 			sp.Damping = _Tune.FSusDamping * Units.Damping_N_sdivm
 			sp.Stiffness = _Tune.FSusStiffness * 9806.65 * Units.Stiffness_Ndivm -- 9806.65 converts kgf/mm to N/m
 			sp.FreeLength = _Tune.FSusLength + _Tune.FPreCompress
@@ -279,7 +280,7 @@ for _, wheel in Drive do
 				end
 			end
 		else
-			g.D = _Tune.RGyroDampening
+			stabilizerGyro.D = _Tune.RGyroDampening
 			sp.Damping = _Tune.RSusDamping * Units.Damping_N_sdivm
 			sp.Stiffness = _Tune.RSusStiffness * 9806.65 * Units.Stiffness_Ndivm
 			sp.FreeLength = _Tune.RSusLength + _Tune.RPreCompress
