@@ -234,9 +234,13 @@ local function update()
 		local vol = data.vol - values.Clutch.Value * (data.vol - data.clutchVol)
 		local off = true
 		for i, v in next, data.gear do
-			if v == values.Gear.Value then off = false end
+			if v == values.Gear.Value then
+				off = false
+			end
 		end
-		if off then vol = data.offVol end
+		if off then
+			vol = data.offVol
+		end
 		local pit = data.pitch * (getWheelSpeed() / 300)
 
 		if vars.FE then

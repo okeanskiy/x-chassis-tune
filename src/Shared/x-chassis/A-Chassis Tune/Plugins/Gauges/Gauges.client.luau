@@ -106,13 +106,13 @@ if autoscaling then
 	end
 
 	local wDia = 0
-	for i, v in pairs(Drive) do
+	for _, v in Drive do
 		if v.Size.Y > wDia then
 			wDia = v.Size.Y
 		end
 	end
-	Drive = nil
-	for i, v in pairs(UNITS) do
+
+	for _, v in pairs(UNITS) do
 		v.maxSpeed = math.ceil(
 			v.scaling
 				* wDia
@@ -154,7 +154,8 @@ do
 	center.Tach.Redline.N2.Image.Rotation = math.clamp(rot, 90, 270)
 end
 
-local blns = Instance.new("Frame", center.Boost)
+local blns = Instance.new("Frame")
+blns.Parent = center.Boost
 blns.Name = "blns"
 blns.BackgroundTransparency = 1
 blns.BorderSizePixel = 0

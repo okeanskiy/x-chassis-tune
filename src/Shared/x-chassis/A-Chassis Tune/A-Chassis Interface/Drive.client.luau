@@ -644,7 +644,6 @@ if not TuneData.Engine and TuneData.Electric then
 	TuneData.ShiftRPM = TuneData.E_Redline
 	TuneData.Turbochargers = 0
 	TuneData.Superchargers = 0
-	TuneData.Clutch = false
 	TuneData.IdleRPM = 0
 	TuneData.IdleThrottle = 0
 	TuneData.ShiftUpTime = 0.1
@@ -836,9 +835,6 @@ function Engine(rawDeltaTime)
 	local revMin = 1
 	local goalMin = 1
 	local goalMax = TuneData.Redline + 100
-	if TuneData.Clutch then
-		revMin = 0
-	end
 
 	if isShifting and ShiftUp then
 		_GThrot = TuneData.IdleThrottle / 100
@@ -859,16 +855,9 @@ function Engine(rawDeltaTime)
 	end
 
 	if not _IsOn then
-		ticc = tick()
 		_Clutch = 1
 		if not script.Parent.Starting.Value then
 			_GThrot = 0
-		end
-	end
-
-	if ((ClutchPressing and CurrentGear == 0) or (_PlayerClutch and CurrentGear ~= 0)) and TuneData.NeutralLimit then
-		if (CurrentGear == 0 and not TuneData.LimitClutch) or TuneData.LimitClutch then
-			goalMax = TuneData.NeutralRevRPM
 		end
 	end
 
@@ -931,35 +920,10 @@ function Engine(rawDeltaTime)
 		end
 	end
 
-	if TuneData.Clutch then
-		if _IsOn then
-			if ClutchPressing then
-				_ClutchKick = 1
-			end
-
-			_ClutchKick = _ClutchKick * (TuneData.ClutchEngage / 100)
-
-			local assemblySpeed = script.Parent.Values.Velocity.Value.Magnitude
-			_ClutchModulate = math.min(
-				assemblySpeed / (Units.Velocity_mdivs / 3.6) / TuneData.SpeedEngage / math.abs(CurrentGear)
-					- _ClutchKick,
-				1
-			)
-
-			if not ClutchPressing then
-				_Clutch = math.min(1 - _ClutchModulate, 1)
-			else
-				_Clutch = 1
-			end
-		else
-			_Clutch = script.Parent.Values.Clutch.Value
-		end
+	if not ClutchPressing and not isShifting then
+		_Clutch = 0
 	else
-		if not ClutchPressing and not isShifting then
-			_Clutch = 0
-		else
-			_Clutch = 1
-		end
+		_Clutch = 1
 	end
 
 	if revLimiting or script.Parent.Starting.Value then

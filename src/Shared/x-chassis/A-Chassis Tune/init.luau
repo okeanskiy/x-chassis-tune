@@ -209,8 +209,6 @@ do
 	Tune.TCSLimit		= 8		-- Minimum amount of torque at max reduction (in percent)
 
 --[[Transmission]]
-	Tune.Clutch			= true		-- Implements a realistic clutch, change to "false" for the chassis to act like AC6.81T.
-
 	Tune.TransModes		= {"Auto", "Semi", "Manual"}												--[[
 	[Modes]
 		"Auto"		: Automatic shifting
@@ -223,17 +221,7 @@ do
 
 --[[Transmission]]
 	--Transmission Settings
-	Tune.ClutchEngage	= 10		-- How fast engagement is (0 = instant, 99 = super slow)	
-	Tune.SpeedEngage 	= 20		-- Speed the clutch fully engages at (Based on km/h)
 	Tune.ClutchIdle		= 400		-- How much RPM past idle is needed to engage the clutch.
-
-	--Clutch: "Old" mode
-	Tune.ClutchRPMMult	= 1.0		-- Clutch RPM multiplier, recommended to leave at 1.0
-
-	--Neutral Rev Limiter (Avxnturador)
-	Tune.NeutralLimit	= false		-- Enables a different redline RPM for when the car is in neutral
-	Tune.NeutralRevRPM	= 5000		-- The rev limiter when the car is in neutral
-	Tune.LimitClutch	= false		-- Will also limit RPMs while the clutch is pressed down
 
 	--Automatic Settings
 	Tune.AutoShiftVers	= "New"												--[[
