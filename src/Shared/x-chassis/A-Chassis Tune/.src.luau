@@ -124,13 +124,6 @@ do
 	Tune.MinSteer			= 25		-- Minimum steering angle at max steer decay (in percent)
 	Tune.MSteerExp			= 1			-- Mouse steering exponential degree
 
-	-- Four Wheel Steering (LuaInt)
-	Tune.FWSteer			= 'None'	-- Static, Speed, Both, or None
-	Tune.RSteerOuter		= 10		-- Outer rear wheel steering angle (in degrees)
-	Tune.RSteerInner		= 10		-- Inner rear wheel steering angle (in degrees)
-	Tune.RSteerSpeed		= 60		-- Speed at which 4WS fully activates (Speed), deactivates (Static), or transition begins (Both) (km/h)
-	Tune.RSteerDecay		= 330		-- Speed of gradient cutoff (in km/h)
-
 	-- Steer Tuning
 	Tune.SteerD				= 1000		-- Steering Dampening
 	Tune.SteerMaxTorque		= 50000		-- Steering Force

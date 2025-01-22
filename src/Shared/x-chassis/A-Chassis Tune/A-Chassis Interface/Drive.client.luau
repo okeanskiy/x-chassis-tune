@@ -29,8 +29,6 @@ local RParkingBrakeForce = TuneData.PBrakeForce * 9.80665 * Units.Force_N * (1 -
 local EBrakeForce = TuneData.EBrakeForce
 local SteerOuter = TuneData.SteerOuter
 local SteerInner = TuneData.SteerInner
-local RSteerOuter = TuneData.RSteerOuter
-local RSteerInner = TuneData.RSteerInner
 
 local boolToNum = {[true] = 1, [false] = 0}
 
@@ -565,78 +563,28 @@ function Steering(dt)
 	end
 	
 	--Steer Decay Multiplier
-	local sDecay = (1-math.min(car.DriveSeat.AssemblyLinearVelocity.Magnitude/(Units.Velocity_mdivs/3.6)/(TuneData.SteerDecay/(Units.Velocity_mdivs/3.6)),1-(TuneData.MinSteer/100)))
-	local rsDecay = (1-math.min(car.DriveSeat.AssemblyLinearVelocity.Magnitude/(Units.Velocity_mdivs/3.6)/(TuneData.RSteerDecay/(Units.Velocity_mdivs/3.6)),1-(TuneData.MinSteer/100)))
+	local sDecay = (1 - math.min(car.DriveSeat.AssemblyLinearVelocity.Magnitude/(Units.Velocity_mdivs/3.6)/(TuneData.SteerDecay/(Units.Velocity_mdivs/3.6)),1-(TuneData.MinSteer/100)))
 	
 	--Apply Steering
-	for i,v in next, car.Wheels:GetChildren() do
-		if v.Name=="F" then
-			v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*SteerInner*sDecay),0)
-		elseif v.Name=="FL" then
+	for _, wheel in next, car.Wheels:GetChildren() do
+		if wheel.Name=="F" then
+			wheel.Arm.Steer.CFrame=wheel.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*SteerInner*sDecay),0)
+		elseif wheel.Name=="FL" then
 			if _GSteerC>= 0 then
-				v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*SteerOuter*sDecay),0)--luaint edit
+				wheel.Arm.Steer.CFrame=wheel.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*SteerOuter*sDecay),0)
 			else
-				v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*SteerInner*sDecay),0)--luaint edit
+				wheel.Arm.Steer.CFrame=wheel.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*SteerInner*sDecay),0)
 			end	
-		elseif v.Name=="FR" then
+		elseif wheel.Name=="FR" then
 			if _GSteerC>= 0 then
-				v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*SteerInner*sDecay),0)--luaint edit
+				wheel.Arm.Steer.CFrame=wheel.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*SteerInner*sDecay),0)
 			else
-				v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*SteerOuter*sDecay),0)--luaint edit
-			end
-		elseif v.Name=='R' then
-			if TuneData.FWSteer=='None' then
-			elseif TuneData.FWSteer=='Static' then
-				v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,math.rad(_GSteerC*RSteerInner*rsDecay*math.max(0,1-(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-			elseif TuneData.FWSteer=='Speed' then
-				v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*RSteerInner*rsDecay*math.min(1,(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-			elseif TuneData.FWSteer=='Both' then
-				v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,math.rad(_GSteerC*RSteerInner*rsDecay*math.max(-1,1-(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-			end
-		elseif v.Name=='RL' then
-			if TuneData.FWSteer=='None' then
-			elseif TuneData.FWSteer=='Static' then
-				if _GSteerC>= 0 then
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,math.rad(_GSteerC*RSteerOuter*rsDecay*math.max(0,1-(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				else
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,math.rad(_GSteerC*RSteerInner*rsDecay*math.max(0,1-(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				end
-			elseif TuneData.FWSteer=='Speed' then
-				if _GSteerC>= 0 then
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*RSteerOuter*rsDecay*math.min(1,(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				else
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*RSteerInner*rsDecay*math.min(1,(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				end
-			elseif TuneData.FWSteer=='Both' then
-				if _GSteerC>= 0 then
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,math.rad(_GSteerC*RSteerOuter*rsDecay*math.max(-1,1-(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				else
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,math.rad(_GSteerC*RSteerInner*rsDecay*math.max(-1,1-(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				end
-			end
-		elseif v.Name=='RR' then
-			if TuneData.FWSteer=='None' then
-			elseif TuneData.FWSteer=='Static' then
-				if _GSteerC>= 0 then
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,math.rad(_GSteerC*RSteerInner*rsDecay*math.max(0,1-(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				else
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,math.rad(_GSteerC*RSteerOuter*rsDecay*math.max(0,1-(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				end
-			elseif TuneData.FWSteer=='Speed' then
-				if _GSteerC>= 0 then
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*RSteerInner*rsDecay*math.min(1,(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				else
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*RSteerOuter*rsDecay*math.min(1,(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				end
-			elseif TuneData.FWSteer=='Both' then
-				if _GSteerC>= 0 then
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,math.rad(_GSteerC*RSteerInner*rsDecay*math.max(-1,1-(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				else
-					v.Arm.Steer.CFrame=v.Base.CFrame*CFrame.Angles(0,math.rad(_GSteerC*RSteerOuter*rsDecay*math.max(-1,1-(car.DriveSeat.Velocity.Magnitude/TuneData.RSteerSpeed))),0)--luaint edit
-				end
+				wheel.Arm.Steer.CFrame=wheel.Base.CFrame*CFrame.Angles(0,-math.rad(_GSteerC*SteerOuter*sDecay),0)
 			end
 		end
-		if v:GetAttribute("SteerDisabled") then v.Arm.Steer.CFrame = v.Base.CFrame end
+		if wheel:GetAttribute("SteerDisabled") then
+			wheel.Arm.Steer.CFrame = wheel.Base.CFrame
+		end
 	end
 end
 

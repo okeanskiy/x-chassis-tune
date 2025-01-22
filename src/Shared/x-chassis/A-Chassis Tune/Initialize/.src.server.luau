@@ -373,11 +373,8 @@ for _,v in pairs(Drive) do
 	end
 
 	--Lock Rear Steering Axle
-	if _Tune.FWSteer=='Static' or _Tune.FWSteer=='Speed' or _Tune.FWSteer=='Both' then
-	else
-		if v.Name == "RL" or v.Name == "RR" or v.Name=="R" then
-			MakeWeld(base,axle)
-		end
+	if v.Name == "RL" or v.Name == "RR" or v.Name=="R" then
+		MakeWeld(base,axle)
 	end
 
 	MakeWeld(arm,axle)
@@ -412,15 +409,6 @@ for _,v in pairs(Drive) do
 		steer.D=_Tune.SteerD
 		steer.MaxTorque=Vector3.new(0,_Tune.SteerMaxTorque,0)
 		steer.cframe=v.CFrame
-	else
-		if (_Tune.FWSteer=='Static' or _Tune.FWSteer=='Speed' or _Tune.FWSteer=='Both') then
-			local steer=Instance.new("BodyGyro",arm)
-			steer.Name="Steer"
-			steer.P=_Tune.SteerP
-			steer.D=_Tune.SteerD
-			steer.MaxTorque=Vector3.new(0,_Tune.SteerMaxTorque,0)
-			steer.cframe=v.CFrame
-		end
 	end
 	--Add Stabilization Gyro
 	local gyro=Instance.new("BodyGyro",v)
@@ -446,9 +434,6 @@ for _,v in pairs(Drive) do
 	rotationHinge.Name = "Rotate"
 	rotationHinge.LimitsEnabled = true
 	rotationHinge.UpperAngle = math.max(SteerOuter, SteerInner)
-	if v.Name == "RL" or v.Name == "RR" or v.Name == "R" then
-		rotationHinge.UpperAngle = math.max(_Tune.RSteerOuter, _Tune.RSteerInner)
-	end
 	rotationHinge.LowerAngle = -rotationHinge.UpperAngle
 	rotationHinge.Attachment0 = rotationAttachment0
 	rotationHinge.Attachment1 = rotationAttachment1
