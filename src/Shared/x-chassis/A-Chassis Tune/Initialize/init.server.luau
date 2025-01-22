@@ -64,7 +64,7 @@ DReduce(car)
 --[[Wheel Configuration]]
 --Store Reference Orientation Function
 function getParts(model, t, a)
-	for i, v in pairs(model:GetChildren()) do
+	for _, v in pairs(model:GetChildren()) do
 		if v:IsA("BasePart") then
 			table.insert(t, { v, a.CFrame:toObjectSpace(v.CFrame) })
 		elseif v:IsA("Model") then
@@ -93,91 +93,80 @@ function GetCarCenter(a)
 	return center
 end
 
---PGS/Legacy
-local fDistX = _Tune.FWsBoneLen * math.cos(math.rad(_Tune.FWsBoneAngle))
-local fDistY = _Tune.FWsBoneLen * math.sin(math.rad(_Tune.FWsBoneAngle))
-local rDistX = _Tune.RWsBoneLen * math.cos(math.rad(_Tune.RWsBoneAngle))
-local rDistY = _Tune.RWsBoneLen * math.sin(math.rad(_Tune.RWsBoneAngle))
-
-local fSLX = _Tune.FSusLength * math.cos(math.rad(_Tune.FSusAngle))
-local fSLY = _Tune.FSusLength * math.sin(math.rad(_Tune.FSusAngle))
-local rSLX = _Tune.RSusLength * math.cos(math.rad(_Tune.RSusAngle))
-local rSLY = _Tune.RSusLength * math.sin(math.rad(_Tune.RSusAngle))
-
-for _, v in pairs(Drive) do
+for _, wheel in Drive do
 	--Apply Wheel Density
-	if v.Name == "FL" or v.Name == "FR" or v.Name == "F" then
-		if v:IsA("BasePart") then
-			if v.CustomPhysicalProperties == nil then
-				v.CustomPhysicalProperties = PhysicalProperties.new(v.Material)
+	if wheel.Name == "FL" or wheel.Name == "FR" or wheel.Name == "F" then
+		if wheel:IsA("BasePart") then
+			if wheel.CustomPhysicalProperties == nil then
+				wheel.CustomPhysicalProperties = PhysicalProperties.new(wheel.Material)
 			end
-			v.CustomPhysicalProperties = PhysicalProperties.new(
-				(_Tune.FWheelWeight * Units.Mass_kg) / (math.pi * (v.Size.Y / 2) ^ 2 * v.Size.X),
-				v.CustomPhysicalProperties.Friction,
-				v.CustomPhysicalProperties.Elasticity,
-				v.CustomPhysicalProperties.FrictionWeight,
-				v.CustomPhysicalProperties.ElasticityWeight
+			wheel.CustomPhysicalProperties = PhysicalProperties.new(
+				(_Tune.FWheelWeight * Units.Mass_kg) / (math.pi * (wheel.Size.Y / 2) ^ 2 * wheel.Size.X),
+				wheel.CustomPhysicalProperties.Friction,
+				wheel.CustomPhysicalProperties.Elasticity,
+				wheel.CustomPhysicalProperties.FrictionWeight,
+				wheel.CustomPhysicalProperties.ElasticityWeight
 			)
 		end
 	else
-		if v:IsA("BasePart") then
-			if v.CustomPhysicalProperties == nil then
-				v.CustomPhysicalProperties = PhysicalProperties.new(v.Material)
+		if wheel:IsA("BasePart") then
+			if wheel.CustomPhysicalProperties == nil then
+				wheel.CustomPhysicalProperties = PhysicalProperties.new(wheel.Material)
 			end
-			v.CustomPhysicalProperties = PhysicalProperties.new(
-				(_Tune.RWheelWeight * Units.Mass_kg) / (math.pi * (v.Size.Y / 2) ^ 2 * v.Size.X),
-				v.CustomPhysicalProperties.Friction,
-				v.CustomPhysicalProperties.Elasticity,
-				v.CustomPhysicalProperties.FrictionWeight,
-				v.CustomPhysicalProperties.ElasticityWeight
+			wheel.CustomPhysicalProperties = PhysicalProperties.new(
+				(_Tune.RWheelWeight * Units.Mass_kg) / (math.pi * (wheel.Size.Y / 2) ^ 2 * wheel.Size.X),
+				wheel.CustomPhysicalProperties.Friction,
+				wheel.CustomPhysicalProperties.Elasticity,
+				wheel.CustomPhysicalProperties.FrictionWeight,
+				wheel.CustomPhysicalProperties.ElasticityWeight
 			)
 		end
 	end
 
 	--Resurface Wheels
 	for _, a in pairs({ "Top", "Bottom", "Left", "Right", "Front", "Back" }) do
-		v[a .. "Surface"] = Enum.SurfaceType.Smooth
+		wheel[a .. "Surface"] = Enum.SurfaceType.Smooth
 	end
 
 	--Save wheel part positions
 	local WParts = {}
-	for _, a in next, v.Parts:GetDescendants() do
+	for _, a in next, wheel.Parts:GetDescendants() do
 		if not a:IsA("BasePart") then
 			continue
 		end
-		table.insert(WParts, { a, v.CFrame:ToObjectSpace(a.CFrame) })
+		table.insert(WParts, { a, wheel.CFrame:ToObjectSpace(a.CFrame) })
 	end
-	for _, a in next, v.WheelFixed:GetDescendants() do
+	for _, a in next, wheel.WheelFixed:GetDescendants() do
 		if not a:IsA("BasePart") then
 			continue
 		end
-		table.insert(WParts, { a, v.CFrame:ToObjectSpace(a.CFrame) })
+		table.insert(WParts, { a, wheel.CFrame:ToObjectSpace(a.CFrame) })
 	end
 
 	--Align Wheels
-	if v.Name == "FL" then
-		v.CFrame = v.CFrame * CFrame.Angles(math.rad(_Tune.FCaster), math.rad(-_Tune.FToe), math.rad(_Tune.FCamber))
-	elseif v.Name == "FR" then
-		v.CFrame = v.CFrame * CFrame.Angles(math.rad(-_Tune.FCaster), math.rad(_Tune.FToe), math.rad(_Tune.FCamber))
-	elseif v.Name == "RL" then
-		v.CFrame = v.CFrame * CFrame.Angles(math.rad(_Tune.RCaster), math.rad(-_Tune.RToe), math.rad(_Tune.RCamber))
-	elseif v.Name == "RR" then
-		v.CFrame = v.CFrame * CFrame.Angles(math.rad(-_Tune.RCaster), math.rad(_Tune.RToe), math.rad(_Tune.RCamber))
+	if wheel.Name == "FL" then
+		wheel.CFrame = wheel.CFrame * CFrame.Angles(math.rad(_Tune.FCaster), math.rad(-_Tune.FToe), math.rad(_Tune.FCamber))
+	elseif wheel.Name == "FR" then
+		wheel.CFrame = wheel.CFrame * CFrame.Angles(math.rad(-_Tune.FCaster), math.rad(_Tune.FToe), math.rad(_Tune.FCamber))
+	elseif wheel.Name == "RL" then
+		wheel.CFrame = wheel.CFrame * CFrame.Angles(math.rad(_Tune.RCaster), math.rad(-_Tune.RToe), math.rad(_Tune.RCamber))
+	elseif wheel.Name == "RR" then
+		wheel.CFrame = wheel.CFrame * CFrame.Angles(math.rad(-_Tune.RCaster), math.rad(_Tune.RToe), math.rad(_Tune.RCamber))
 	end
 
 	for _, a in next, WParts do
-		a[1].CFrame = v.CFrame * a[2]
+		a[1].CFrame = wheel.CFrame * a[2]
 	end
 
 	--[[Chassis Assembly]]
 	--Create Steering Axle
-	local arm = Instance.new("Part", v)
+	local arm = Instance.new("Part", wheel)
 	arm.Name = "Arm"
 	arm.Anchored = true
 	arm.CanCollide = false
 	arm.FormFactor = Enum.FormFactor.Custom
 	arm.Size = Vector3.new(_Tune.AxleSize, _Tune.AxleSize, _Tune.AxleSize)
-	arm.CFrame = v.CFrame
+	arm.CFrame = wheel.CFrame
 	arm.CustomPhysicalProperties = PhysicalProperties.new(math.clamp(_Tune.AxleDensity, 0.01, 100), 0, 0, 100, 100)
 	arm.TopSurface = Enum.SurfaceType.Smooth
 	arm.BottomSurface = Enum.SurfaceType.Smooth
@@ -185,7 +174,7 @@ for _, v in pairs(Drive) do
 
 	--Create Wheel Spindle
 	local base = arm:Clone()
-	base.Parent = v
+	base.Parent = wheel
 	base.Name = "Base"
 	base.CFrame = arm.CFrame * CFrame.new(0, _Tune.AxleSize, 0)
 
@@ -194,228 +183,133 @@ for _, v in pairs(Drive) do
 
 	--Create Steering Anchor
 	local axle = arm:Clone()
-	axle.Parent = v
+	axle.Parent = wheel
 	axle.Name = "Axle"
-	axle.CFrame = v.CFrame * CFrame.new(v.Size.X / 2 + _Tune.AxleSize / 2, 0, 0)
+	axle.CFrame = wheel.CFrame * CFrame.new(wheel.Size.X / 2 + _Tune.AxleSize / 2, 0, 0)
 	axle.LeftSurface = Enum.SurfaceType.Hinge
 
 	--Create Powered Axle (LuaInt)
 	local axlep = arm:Clone()
-	axlep.Parent = v
+	axlep.Parent = wheel
 	axlep.Name = "AxleP"
-	axlep.CFrame = v.CFrame * CFrame.Angles(0, math.rad((v.Name == "FR" or v.Name == "RR") and 0 or 180), 0)
+	axlep.CFrame = wheel.CFrame * CFrame.Angles(0, math.rad((wheel.Name == "FR" or wheel.Name == "RR") and 0 or 180), 0)
 	MakeWeld(axlep, axle)
 
 	--Create Suspension
 	if _Tune.SuspensionEnabled == true then
-		local SuspensionGeometry = v:FindFirstChild("SuspensionGeometry")
-		if SuspensionGeometry then
-			for _, a in next, SuspensionGeometry:GetDescendants() do
-				if a.Name == "Weld" then
-					if a:IsA("BasePart") then
-						MakeWeld(a, car.DriveSeat)
-					elseif a:IsA("Model") then
-						ModelWeld(a, car.DriveSeat)
-					end
+		local SuspensionGeometry = wheel:FindFirstChild("SuspensionGeometry")
+
+		for _, a in next, SuspensionGeometry:GetDescendants() do
+			if a.Name == "Weld" then
+				if a:IsA("BasePart") then
+					MakeWeld(a, car.DriveSeat)
+				elseif a:IsA("Model") then
+					ModelWeld(a, car.DriveSeat)
 				end
 			end
-			MakeWeld(SuspensionGeometry.Hub, base)
-			if SuspensionGeometry:FindFirstChild("SpringTop") then
-				MakeWeld(SuspensionGeometry.SpringTop, car.DriveSeat)
-			end
+		end
+		MakeWeld(SuspensionGeometry.Hub, base)
+		if SuspensionGeometry:FindFirstChild("SpringTop") then
+			MakeWeld(SuspensionGeometry.SpringTop, car.DriveSeat)
+		end
 
-			local susparts = SuspensionGeometry:GetDescendants()
+		local susparts = SuspensionGeometry:GetDescendants()
+		for _, p in pairs(susparts) do
+			if p:IsA("Part") then
+				p.CustomPhysicalProperties =
+					PhysicalProperties.new(math.clamp(_Tune.CustomSuspensionDensity, 0.01, 100), 0, 0, 0, 0)
+				p.Massless = _Tune.CustomSuspensionDensity <= 0
+			end
+		end
+
+		if _Tune.SusVisible == true then
 			for _, p in pairs(susparts) do
 				if p:IsA("Part") then
-					p.CustomPhysicalProperties =
-						PhysicalProperties.new(math.clamp(_Tune.CustomSuspensionDensity, 0.01, 100), 0, 0, 0, 0)
-					p.Massless = _Tune.CustomSuspensionDensity <= 0
-				end
-			end
-
-			if _Tune.SusVisible == true then
-				for _, p in pairs(susparts) do
-					if p:IsA("Part") then
-						p.Transparency = 0.5
-					elseif p:IsA("SpringConstraint") or p:IsA("HingeConstraint") or p:IsA("BallSocketConstraint") then
-						p.Visible = true
-					end
-				end
-			else
-				for _, p in pairs(susparts) do
-					if p:IsA("Part") then
-						p.Transparency = 1
-					elseif p:IsA("SpringConstraint") or p:IsA("HingeConstraint") or p:IsA("BallSocketConstraint") then
-						p.Visible = false
-					end
-				end
-			end
-
-			local g = Instance.new("BodyGyro", SuspensionGeometry.Hub)
-			g.Name = "Stabilizer"
-			g.MaxTorque = Vector3.new(0, 0, 1)
-			g.P = 0
-
-			sp = SuspensionGeometry:FindFirstChild("Spring")
-			sp.LimitsEnabled = true
-			sp.Visible = _Tune.SpringsVisible
-			sp.Radius = _Tune.SusRadius
-			sp.Thickness = _Tune.SusThickness
-			sp.Color = BrickColor.new(_Tune.SusColor)
-			sp.Coils = _Tune.SusCoilCount
-
-			local swayBar = SuspensionGeometry:FindFirstChild("SwayBar")
-			if v.Name == "FL" or v.Name == "FR" or v.Name == "F" then
-				g.D = _Tune.FGyroDampening
-				sp.Damping = _Tune.FSusDamping * Units.Damping_N_sdivm
-				sp.Stiffness = _Tune.FSusStiffness * 9806.65 * Units.Stiffness_Ndivm -- 9806.65 converts kgf/mm to N/m
-				sp.FreeLength = _Tune.FSusLength + _Tune.FPreCompress
-				sp.MaxLength = _Tune.FSusLength + _Tune.FExtensionLim
-				sp.MinLength = _Tune.FSusLength - _Tune.FCompressLim
-				if swayBar then
-					if swayBar.Attachment0 and swayBar.Attachment1 then
-						swayBar.Attachment0.Position = Vector3.new(
-							swayBar.Attachment0.Parent.CFrame:ToObjectSpace(GetCarCenter()).Position.X,
-							0,
-							0
-						)
-						swayBar.Attachment1.Position = Vector3.new(
-							swayBar.Attachment1.Parent.CFrame:ToObjectSpace(GetCarCenter()).Position.X,
-							0,
-							0
-						)
-						swayBar.Stiffness = _Tune.FSwayBar * 9806.65 * Units.Stiffness_Ndivm
-						swayBar.FreeLength = 0
-					end
-				end
-			else
-				g.D = _Tune.RGyroDampening
-				sp.Damping = _Tune.RSusDamping * Units.Damping_N_sdivm
-				sp.Stiffness = _Tune.RSusStiffness * 9806.65 * Units.Stiffness_Ndivm
-				sp.FreeLength = _Tune.RSusLength + _Tune.RPreCompress
-				sp.MaxLength = _Tune.RSusLength + _Tune.RExtensionLim
-				sp.MinLength = _Tune.RSusLength - _Tune.RCompressLim
-				if swayBar then
-					if swayBar.Attachment0 and swayBar.Attachment1 then
-						swayBar.Attachment0.Position = Vector3.new(
-							swayBar.Attachment0.Parent.CFrame:ToObjectSpace(GetCarCenter()).Position.X,
-							0,
-							0
-						)
-						swayBar.Attachment1.Position = Vector3.new(
-							swayBar.Attachment1.Parent.CFrame:ToObjectSpace(GetCarCenter()).Position.X,
-							0,
-							0
-						)
-						swayBar.Stiffness = _Tune.RSwayBar * 9806.65 * Units.Stiffness_Ndivm
-						swayBar.FreeLength = 0
-					end
+					p.Transparency = 0.5
+				elseif p:IsA("SpringConstraint") or p:IsA("HingeConstraint") or p:IsA("BallSocketConstraint") then
+					p.Visible = true
 				end
 			end
 		else
-			local legacyCFrame = v.CFrame * CFrame.Angles(math.rad(90), 0, math.rad(90)) -- not gonna bother fixing the entire thing so i just put this because it works
-
-			local sa = arm:Clone()
-			sa.Parent = v
-			sa.Name = "#SA"
-			sa.CFrame = legacyCFrame * CFrame.Angles(-math.pi / 2, -math.pi / 2, 0)
-			if v.Name == "FL" or v.Name == "FR" or v.Name == "F" then
-				local aOff = _Tune.FAnchorOffset
-				sa.CFrame = legacyCFrame
-					* CFrame.new(_Tune.AxleSize / 2, -fDistX, -fDistY)
-					* CFrame.new(aOff[3], aOff[1], -aOff[2])
-					* CFrame.Angles(-math.pi / 2, -math.pi / 2, 0)
-			else
-				local aOff = _Tune.RAnchorOffset
-				sa.CFrame = legacyCFrame
-					* CFrame.new(_Tune.AxleSize / 2, -rDistX, -rDistY)
-					* CFrame.new(aOff[3], aOff[1], -aOff[2])
-					* CFrame.Angles(-math.pi / 2, -math.pi / 2, 0)
-			end
-
-			local sb = sa:Clone()
-			sb.Parent = v
-			sb.Name = "#SB"
-			sb.CFrame = sa.CFrame * CFrame.new(0, 0, _Tune.AxleSize)
-			sb.FrontSurface = Enum.SurfaceType.Hinge
-
-			local g = Instance.new("BodyGyro", sb)
-			g.Name = "Stabilizer"
-			g.MaxTorque = Vector3.new(0, 0, 1)
-			g.P = 0
-
-			local sf1 = Instance.new("Attachment", sa)
-			sf1.Name = "SAtt"
-
-			local sf2 = sf1:Clone()
-			sf2.Parent = sb
-
-			--(Avxnturador) adds spring offset
-			if v.Name == "FL" or v.Name == "FR" or v.Name == "F" then
-				local aOff = _Tune.FSpringOffset
-				if v.Name == "FL" then
-					sf1.Position =
-						Vector3.new(fDistX - fSLX + aOff[1], -fDistY + fSLY + aOff[2], _Tune.AxleSize / 2 + aOff[3])
-					sf2.Position = Vector3.new(fDistX + aOff[1], -fDistY + aOff[2], -_Tune.AxleSize / 2 + aOff[3])
-				else
-					sf1.Position =
-						Vector3.new(fDistX - fSLX + aOff[1], -fDistY + fSLY + aOff[2], _Tune.AxleSize / 2 - aOff[3])
-					sf2.Position = Vector3.new(fDistX + aOff[1], -fDistY + aOff[2], -_Tune.AxleSize / 2 - aOff[3])
-				end
-			elseif v.Name == "RL" or v.Name == "RR" or v.Name == "R" then
-				local aOff = _Tune.RSpringOffset
-				if v.Name == "RL" then
-					sf1.Position =
-						Vector3.new(rDistX - rSLX + aOff[1], -rDistY + rSLY + aOff[2], _Tune.AxleSize / 2 + aOff[3])
-					sf2.Position = Vector3.new(rDistX + aOff[1], -rDistY + aOff[2], -_Tune.AxleSize / 2 + aOff[3])
-				else
-					sf1.Position =
-						Vector3.new(rDistX - rSLX + aOff[1], -rDistY + rSLY + aOff[2], _Tune.AxleSize / 2 - aOff[3])
-					sf2.Position = Vector3.new(rDistX + aOff[1], -rDistY + aOff[2], -_Tune.AxleSize / 2 - aOff[3])
+			for _, p in pairs(susparts) do
+				if p:IsA("Part") then
+					p.Transparency = 1
+				elseif p:IsA("SpringConstraint") or p:IsA("HingeConstraint") or p:IsA("BallSocketConstraint") then
+					p.Visible = false
 				end
 			end
-
-			sb:MakeJoints()
-			--(LuaInt) there was axle:makejoints here I believe, but the new powered axle manually welds itself so I ditched it
-
-			local sp = Instance.new("SpringConstraint", v)
-			sp.Name = "Spring"
-			sp.Attachment0 = sf1
-			sp.Attachment1 = sf2
-			sp.LimitsEnabled = true
-
-			sp.Visible = _Tune.SusVisible
-			sp.Radius = _Tune.SusRadius
-			sp.Thickness = _Tune.SusThickness
-			sp.Color = BrickColor.new(_Tune.SusColor)
-			sp.Coils = _Tune.SusCoilCount
-
-			if v.Name == "FL" or v.Name == "FR" or v.Name == "F" then
-				g.D = _Tune.FGyroDampening
-				sp.Damping = _Tune.FSusDamping * Units.Damping_N_sdivm
-				sp.Stiffness = _Tune.FSusStiffness * 9806.65 * Units.Stiffness_Ndivm
-				sp.FreeLength = _Tune.FSusLength + _Tune.FPreCompress
-				sp.MaxLength = _Tune.FSusLength + _Tune.FExtensionLim
-				sp.MinLength = _Tune.FSusLength - _Tune.FCompressLim
-			else
-				g.D = _Tune.RGyroDampening
-				sp.Damping = _Tune.RSusDamping * Units.Damping_N_sdivm
-				sp.Stiffness = _Tune.RSusStiffness * 9806.65 * Units.Stiffness_Ndivm
-				sp.FreeLength = _Tune.RSusLength + _Tune.RPreCompress
-				sp.MaxLength = _Tune.RSusLength + _Tune.RExtensionLim
-				sp.MinLength = _Tune.RSusLength - _Tune.RCompressLim
-			end
-
-			MakeWeld(car.DriveSeat, sa)
-			MakeWeld(sb, base)
 		end
-		v.Massless = false
+
+		local g = Instance.new("BodyGyro")
+		g.Name = "Stabilizer"
+		g.MaxTorque = Vector3.new(0, 0, 1)
+		g.P = 0
+		g.Parent = SuspensionGeometry.Hub
+
+		local sp = SuspensionGeometry:FindFirstChild("Spring")
+		sp.LimitsEnabled = true
+		sp.Visible = _Tune.SpringsVisible
+		sp.Radius = _Tune.SusRadius
+		sp.Thickness = _Tune.SusThickness
+		sp.Color = BrickColor.new(_Tune.SusColor)
+		sp.Coils = _Tune.SusCoilCount
+
+		local swayBar = SuspensionGeometry:FindFirstChild("SwayBar")
+		if wheel.Name == "FL" or wheel.Name == "FR" or wheel.Name == "F" then
+			g.D = _Tune.FGyroDampening
+			sp.Damping = _Tune.FSusDamping * Units.Damping_N_sdivm
+			sp.Stiffness = _Tune.FSusStiffness * 9806.65 * Units.Stiffness_Ndivm -- 9806.65 converts kgf/mm to N/m
+			sp.FreeLength = _Tune.FSusLength + _Tune.FPreCompress
+			sp.MaxLength = _Tune.FSusLength + _Tune.FExtensionLim
+			sp.MinLength = _Tune.FSusLength - _Tune.FCompressLim
+			if swayBar then
+				if swayBar.Attachment0 and swayBar.Attachment1 then
+					swayBar.Attachment0.Position = Vector3.new(
+						swayBar.Attachment0.Parent.CFrame:ToObjectSpace(GetCarCenter()).Position.X,
+						0,
+						0
+					)
+					swayBar.Attachment1.Position = Vector3.new(
+						swayBar.Attachment1.Parent.CFrame:ToObjectSpace(GetCarCenter()).Position.X,
+						0,
+						0
+					)
+					swayBar.Stiffness = _Tune.FSwayBar * 9806.65 * Units.Stiffness_Ndivm
+					swayBar.FreeLength = 0
+				end
+			end
+		else
+			g.D = _Tune.RGyroDampening
+			sp.Damping = _Tune.RSusDamping * Units.Damping_N_sdivm
+			sp.Stiffness = _Tune.RSusStiffness * 9806.65 * Units.Stiffness_Ndivm
+			sp.FreeLength = _Tune.RSusLength + _Tune.RPreCompress
+			sp.MaxLength = _Tune.RSusLength + _Tune.RExtensionLim
+			sp.MinLength = _Tune.RSusLength - _Tune.RCompressLim
+			if swayBar then
+				if swayBar.Attachment0 and swayBar.Attachment1 then
+					swayBar.Attachment0.Position = Vector3.new(
+						swayBar.Attachment0.Parent.CFrame:ToObjectSpace(GetCarCenter()).Position.X,
+						0,
+						0
+					)
+					swayBar.Attachment1.Position = Vector3.new(
+						swayBar.Attachment1.Parent.CFrame:ToObjectSpace(GetCarCenter()).Position.X,
+						0,
+						0
+					)
+					swayBar.Stiffness = _Tune.RSwayBar * 9806.65 * Units.Stiffness_Ndivm
+					swayBar.FreeLength = 0
+				end
+			end
+		end
+
+		wheel.Massless = false
 	else
 		MakeWeld(car.DriveSeat, base)
 	end
 
 	--Lock Rear Steering Axle
-	if v.Name == "RL" or v.Name == "RR" or v.Name == "R" then
+	if wheel.Name == "RL" or wheel.Name == "RR" or wheel.Name == "R" then
 		MakeWeld(base, axle)
 	end
 
@@ -424,40 +318,40 @@ for _, v in pairs(Drive) do
 	arm:MakeJoints()
 
 	--Weld Miscelaneous Parts
-	if v:FindFirstChild("SuspensionFixed") ~= nil then
-		ModelWeld(v.SuspensionFixed, car.DriveSeat)
+	if wheel:FindFirstChild("SuspensionFixed") ~= nil then
+		ModelWeld(wheel.SuspensionFixed, car.DriveSeat)
 	end
-	if v:FindFirstChild("WheelFixed") ~= nil then
-		ModelWeld(v.WheelFixed, axle)
+	if wheel:FindFirstChild("WheelFixed") ~= nil then
+		ModelWeld(wheel.WheelFixed, axle)
 	end
-	if v:FindFirstChild("Fixed") ~= nil then
-		ModelWeld(v.Fixed, arm)
+	if wheel:FindFirstChild("Fixed") ~= nil then
+		ModelWeld(wheel.Fixed, arm)
 	end
 
 	--Weld Wheel Parts
-	if v:FindFirstChild("Parts") ~= nil then
-		ModelWeld(v.Parts, v)
+	if wheel:FindFirstChild("Parts") ~= nil then
+		ModelWeld(wheel.Parts, wheel)
 	end
 
 	--Add Steering Gyro
-	if v:FindFirstChild("Steer") then
-		v:FindFirstChild("Steer"):Destroy()
+	if wheel:FindFirstChild("Steer") then
+		wheel:FindFirstChild("Steer"):Destroy()
 	end
 
-	if v.Name == "FR" or v.Name == "FL" or v.Name == "F" then
+	if wheel.Name == "FR" or wheel.Name == "FL" or wheel.Name == "F" then
 		local steer = Instance.new("BodyGyro", arm)
 		steer.Name = "Steer"
 		steer.P = _Tune.SteerP
 		steer.D = _Tune.SteerD
 		steer.MaxTorque = Vector3.new(0, _Tune.SteerMaxTorque, 0)
-		steer.cframe = v.CFrame
+		steer.cframe = wheel.CFrame
 	end
 	--Add Stabilization Gyro
-	local gyro = Instance.new("BodyGyro", v)
+	local gyro = Instance.new("BodyGyro", wheel)
 	gyro.Name = "Stabilizer"
 	gyro.MaxTorque = Vector3.new(1, 0, 1)
 	gyro.P = 0
-	if v.Name == "FL" or v.Name == "FR" or v.Name == "F" then
+	if wheel.Name == "FL" or wheel.Name == "FR" or wheel.Name == "F" then
 		gyro.D = _Tune.FGyroDamp
 	else
 		gyro.D = _Tune.RGyroDamp
@@ -481,29 +375,29 @@ for _, v in pairs(Drive) do
 	rotationHinge.Attachment1 = rotationAttachment1
 
 	--Add Motors (LuaInt)
-	local AV = Instance.new("HingeConstraint", v)
+	local AV = Instance.new("HingeConstraint", wheel)
 	AV.ActuatorType = "Motor"
-	AV.Attachment0 = Instance.new("Attachment", v.AxleP)
-	v.AxleP.Attachment.Name = "AA"
-	AV.Attachment1 = Instance.new("Attachment", v)
-	v.Attachment.Name = "AB"
+	AV.Attachment0 = Instance.new("Attachment", wheel.AxleP)
+	wheel.AxleP.Attachment.Name = "AA"
+	AV.Attachment1 = Instance.new("Attachment", wheel)
+	wheel.Attachment.Name = "AB"
 	AV.Name = "#AV"
 	AV.AngularVelocity = 0
 	AV.MotorMaxTorque = 0
 
-	local BV = Instance.new("HingeConstraint", v)
+	local BV = Instance.new("HingeConstraint", wheel)
 	BV.ActuatorType = "Motor"
-	BV.Attachment0 = Instance.new("Attachment", v.AxleP)
-	v.AxleP.Attachment.Name = "BA"
-	BV.Attachment1 = Instance.new("Attachment", v)
-	v.Attachment.Name = "BB"
+	BV.Attachment0 = Instance.new("Attachment", wheel.AxleP)
+	wheel.AxleP.Attachment.Name = "BA"
+	BV.Attachment1 = Instance.new("Attachment", wheel)
+	wheel.Attachment.Name = "BB"
 	BV.Name = "#BV"
 	BV.AngularVelocity = 0
 	BV.MotorMaxTorque = _Tune.PBrakeForce
 
-	if string.find(v.Name, "L") then
-		v.AB.Orientation = Vector3.new(0, 180, 0)
-		v.BB.Orientation = Vector3.new(0, 180, 0)
+	if string.find(wheel.Name, "L") then
+		wheel.AB.Orientation = Vector3.new(0, 180, 0)
+		wheel.BB.Orientation = Vector3.new(0, 180, 0)
 	end
 end
 

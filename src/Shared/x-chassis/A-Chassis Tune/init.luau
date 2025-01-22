@@ -66,31 +66,6 @@ do
 	Tune.RCompressLim	= .3		-- Max Compression Travel (in studs)
 	Tune.RSwayBar		= 4.2		-- Sway Bar Force in kgf/mm (more = less roll)
 
-	--Old Suspension Settings, applies if there is no SuspensionGeometry for the respective wheel
-	Tune.FSusAngle		= 80		-- Spring Angle (degrees from horizontal)
-	Tune.FWsBoneLen		= 4			-- Wishbone Length
-	Tune.FWsBoneAngle	= 0			-- Wishbone angle (degrees from horizontal)
-	Tune.FAnchorOffset	= {			-- Suspension anchor point offset (relative to center of wheel)
-		--[[Lateral]]		-.4		,	-- positive = outward
-		--[[Vertical]]		-.5		,	-- positive = upward
-		--[[Forward]]		0		}	-- positive = forward
-	Tune.FSpringOffset	= {			-- Suspension anchor point offset (relative to ABOVE anchor offset) (Avxnturador)
-		--[[Lateral]]		0		,	-- positive = outward 
-		--[[Vertical]]		0		,	-- positive = upward
-		--[[Forward]]		0		}	-- positive = forward
-
-	Tune.RSusAngle		= 80		-- Spring Angle (degrees from horizontal)
-	Tune.RWsBoneLen		= 4			-- Wishbone Length
-	Tune.RWsBoneAngle	= 0			-- Wishbone angle (degrees from horizontal)
-	Tune.RAnchorOffset	= {			-- Suspension anchor point offset (relative to center of wheel)
-		--[[Lateral]]		-.4		,	-- positive = outward
-		--[[Vertical]]		-.5		,	-- positive = upward
-		--[[Forward]]		0		}	-- positive = forward
-	Tune.RSpringOffset	= {			-- Suspension anchor point offset (relative to ABOVE anchor offset) (Avxnturador)
-		--[[Lateral]]		0		,	-- positive = outward 
-		--[[Vertical]]		0		,	-- positive = upward
-		--[[Forward]]		0		}	-- positive = forward
-
 	--Aesthetics	
 	Tune.SusVisible		= true			-- Suspension Visible
 	Tune.SpringsVisible	= true			-- Springs Visible
