@@ -123,34 +123,37 @@ end)
 
 --[[Controls]]
 local _CTRL = TuneData.Controls
-local Controls = Instance.new("Folder", script.Parent)
-Controls.Name = "Controls"
-for i, v in next, _CTRL do
-	local a = Instance.new("StringValue", Controls)
-	a.Name = i
-	a.Value = v.Name
-	a.Changed:connect(function()
-		if i == "MouseThrottle" or i == "MouseBrake" then
-			if a.Value == "MouseButton1" or a.Value == "MouseButton2" then
-				_CTRL[i] = Enum.UserInputType[a.Value]
+local ControlsFolder = Instance.new("Folder")
+ControlsFolder.Parent = script.Parent
+ControlsFolder.Name = "Controls"
+for controlName, keyCode in _CTRL do
+	local controlValue = Instance.new("StringValue")
+	controlValue.Name = controlName
+	controlValue.Value = keyCode.Name
+	controlValue.Parent = ControlsFolder
+	controlValue.Changed:Connect(function()
+		if controlName == "MouseThrottle" or controlName == "MouseBrake" then
+			if controlValue.Value == "MouseButton1" or controlValue.Value == "MouseButton2" then
+				_CTRL[controlName] = Enum.UserInputType[controlValue.Value]
 			else
-				_CTRL[i] = Enum.KeyCode[a.Value]
+				_CTRL[controlName] = Enum.KeyCode[controlValue.Value]
 			end
 		else
-			_CTRL[i] = Enum.KeyCode[a.Value]
+			_CTRL[controlName] = Enum.KeyCode[controlValue.Value]
 		end
 	end)
 end
 
 --Deadzone Adjust
 local _PPH = TuneData.Peripherals
-for i, v in next, _PPH do
-	local a = Instance.new("IntValue", Controls)
-	a.Name = i
-	a.Value = v
-	a.Changed:connect(function()
-		a.Value = math.min(100, math.max(0, a.Value))
-		_PPH[i] = a.Value
+for peripheralType, value in _PPH do
+	local peripheralValue = Instance.new("IntValue")
+	peripheralValue.Name = peripheralType
+	peripheralValue.Value = value
+	peripheralValue.Parent = ControlsFolder
+	peripheralValue.Changed:Connect(function()
+		peripheralValue.Value = math.min(100, math.max(0, peripheralValue.Value))
+		_PPH[peripheralType] = peripheralValue.Value
 	end)
 end
 
@@ -159,12 +162,12 @@ function GetCarCenter()
 	local centerR = Vector3.new()
 	local countF = 0
 	local countR = 0
-	for i, v in next, car.Wheels:GetChildren() do
-		if v.Name == "FL" or v.Name == "FR" or v.Name == "F" then
-			centerF = centerF + v.CFrame.p
+	for _, wheel in car.Wheels:GetChildren() do
+		if wheel.Name == "FL" or wheel.Name == "FR" or wheel.Name == "F" then
+			centerF = centerF + wheel.CFrame.p
 			countF = countF + 1
 		else
-			centerR = centerR + v.CFrame.p
+			centerR = centerR + wheel.CFrame.p
 			countR = countR + 1
 		end
 	end
@@ -172,6 +175,28 @@ function GetCarCenter()
 	centerR = centerR / countR
 	local center = CFrame.lookAt(centerR:Lerp(centerF, 0.5), centerF)
 	return center
+end
+
+local function getThrottleInput(input): boolean
+	local isKeyboardThrottle = (input.KeyCode == _CTRL["Throttle"] or input.KeyCode == _CTRL["Throttle2"])
+	local isMouseThrottleInputType =
+		(_CTRL["MouseThrottle"] == Enum.UserInputType.MouseButton1 or _CTRL["MouseThrottle"] == Enum.UserInputType.MouseButton2)
+	local isMouseThrottle =
+		(isMouseThrottleInputType and input.UserInputType == _CTRL["MouseThrottle"])
+		or (input.KeyCode == _CTRL["MouseThrottle"])
+
+	return (not _MSteer and isKeyboardThrottle) or (_MSteer and isMouseThrottle)
+end
+
+local function getBrakeInput(input): boolean
+	local isKeyboardBrake = (input.KeyCode == _CTRL["Brake"] or input.KeyCode == _CTRL["Brake2"])
+	local isMouseBrakeInputType =
+		(_CTRL["MouseBrake"] == Enum.UserInputType.MouseButton1 or _CTRL["MouseBrake"] == Enum.UserInputType.MouseButton2)
+	local isMouseBrake =
+		(isMouseBrakeInputType and input.UserInputType == _CTRL["MouseBrake"])
+		or (input.KeyCode == _CTRL["MouseBrake"])
+
+	return (not _MSteer and isKeyboardBrake) or (_MSteer and isMouseBrake)
 end
 
 --Input Handler
@@ -215,29 +240,8 @@ function DealWithInput(input, gameProcessedEvent)
 	local inputChangeTransmissionMode = input.KeyCode == _CTRL["ContlrToggleTMode"]
 		or input.KeyCode == _CTRL["ToggleTransMode"]
 
-	local inputThrottle = (not _MSteer and (input.KeyCode == _CTRL["Throttle"] or input.KeyCode == _CTRL["Throttle2"]))
-		or (
-			(
-				(
-					(
-						_CTRL["MouseThrottle"] == Enum.UserInputType.MouseButton1
-						or _CTRL["MouseThrottle"] == Enum.UserInputType.MouseButton2
-					) and input.UserInputType == _CTRL["MouseThrottle"]
-				) or input.KeyCode == _CTRL["MouseThrottle"]
-			) and _MSteer
-		)
-
-	local inputBrake = (not _MSteer and (input.KeyCode == _CTRL["Brake"] or input.KeyCode == _CTRL["Brake2"]))
-		or (
-			(
-				(
-					(
-						_CTRL["MouseBrake"] == Enum.UserInputType.MouseButton1
-						or _CTRL["MouseBrake"] == Enum.UserInputType.MouseButton2
-					) and input.UserInputType == _CTRL["MouseBrake"]
-				) or input.KeyCode == _CTRL["MouseBrake"]
-			) and _MSteer
-		)
+	local inputThrottle = getThrottleInput(input)
+	local inputBrake = getBrakeInput(input)
 
 	local inputSteerLeft = not _MSteer and (input.KeyCode == _CTRL["SteerLeft"] or input.KeyCode == _CTRL["SteerLeft2"])
 	local inputSteerRight = not _MSteer
@@ -547,7 +551,7 @@ SteerOuter = (TuneData.LockToLock * 180) / TuneData.SteerRatio
 SteerInner = math.min(SteerOuter - (SteerOuter * (1 - TuneData.Ackerman)), SteerOuter * 1.2)
 
 function Steering(dt)
-	local deltaTime = (60 / (1 / dt))
+	local alpha = 60 * dt
 	local controller = _LastInputWasGamepad or (TuneData.MSteerUsesContlr and _MSteer or false)
 	local SteerSpeed = controller
 			and (TuneData.ContlrSteerSpeed > 0 and TuneData.ContlrSteerSpeed or TuneData.Steerspeed)
@@ -580,15 +584,15 @@ function Steering(dt)
 	--Interpolate Steering
 	if _GSteerC < _GSteerT then
 		if _GSteerC < 0 then
-			_GSteerC = math.min(_GSteerT, _GSteerC + (ReturnSpeed * deltaTime))
+			_GSteerC = math.min(_GSteerT, _GSteerC + (ReturnSpeed * alpha))
 		else
-			_GSteerC = math.min(_GSteerT, _GSteerC + (SteerSpeed * deltaTime))
+			_GSteerC = math.min(_GSteerT, _GSteerC + (SteerSpeed * alpha))
 		end
 	else
 		if _GSteerC > 0 then
-			_GSteerC = math.max(_GSteerT, _GSteerC - (ReturnSpeed * deltaTime))
+			_GSteerC = math.max(_GSteerT, _GSteerC - (ReturnSpeed * alpha))
 		else
-			_GSteerC = math.max(_GSteerT, _GSteerC - (SteerSpeed * deltaTime))
+			_GSteerC = math.max(_GSteerT, _GSteerC - (SteerSpeed * alpha))
 		end
 	end
 
@@ -604,7 +608,7 @@ function Steering(dt)
 	)
 
 	--Apply Steering
-	for _, wheel in next, car.Wheels:GetChildren() do
+	for _, wheel in car.Wheels:GetChildren() do
 		if wheel.Name == "F" then
 			wheel.Arm.Steer.CFrame = wheel.Base.CFrame * CFrame.Angles(0, -math.rad(_GSteerC * SteerInner * sDecay), 0)
 		elseif wheel.Name == "FL" then
