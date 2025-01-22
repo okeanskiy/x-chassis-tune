@@ -777,8 +777,6 @@ end
 
 local _GoalRPM = 0
 local tqTCS = 1
-local _StallOK = false
-local ticc = tick()
 
 --Power calculation prerequesites
 local function computeTorqueCurve(m, n, p, q, M, b, x)
@@ -827,7 +825,6 @@ function Engine(rawDeltaTime)
 	if (CurrentGear == 0 or isShifting) and _IsOn then
 		ClutchPressing = true
 		_Clutch = 1
-		_StallOK = false
 	end
 
 	_FlywheelEnergy = math.max(_FlywheelEnergy - TuneData.Flywheel, 0)
@@ -839,7 +836,7 @@ function Engine(rawDeltaTime)
 	local revMin = 1
 	local goalMin = 1
 	local goalMax = TuneData.Redline + 100
-	if TuneData.Stall and TuneData.Clutch then
+	if TuneData.Clutch then
 		revMin = 0
 	end
 
@@ -954,14 +951,10 @@ function Engine(rawDeltaTime)
 			else
 				_Clutch = 1
 			end
-
-			_StallOK = (_Clutch <= 0.01) or _StallOK
 		else
-			_StallOK = TuneData.Stall
 			_Clutch = script.Parent.Values.Clutch.Value
 		end
 	else
-		_StallOK = false
 		if not ClutchPressing and not isShifting then
 			_Clutch = 0
 		else
@@ -986,10 +979,6 @@ function Engine(rawDeltaTime)
 		RPM = goalMax
 	elseif RPM < goalMin then
 		RPM = goalMin
-	end
-
-	if RPM <= (TuneData.IdleRPM / 4) and _StallOK and (tick() - ticc >= 0.2) then
-		script.Parent.IsOn.Value = not TuneData.Stall
 	end
 
 	-- Torque calculations (Detomiks)
