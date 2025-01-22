@@ -23,19 +23,25 @@ local allEntries = {}
 local con1, con2 = nil, nil
 local canInput, inputType, inputKey = false, nil, nil
 
-local d, s, t = Enum.EasingDirection.Out, Enum.EasingStyle.Quart, .5
+local d, s, t = Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.5
 
 --setup
 local keyboard = window.KeyboardSF
-local mouse = keyboard:Clone() mouse.Name = "MouseSF" mouse.Position = UDim2.new(1, 5, 0, 80) mouse.Parent = window
-local contlr = keyboard:Clone() contlr.Name = "ControllerSF" contlr.Position = UDim2.new(2, 5, 0, 80) contlr.Parent = window
+local mouse = keyboard:Clone()
+mouse.Name = "MouseSF"
+mouse.Position = UDim2.new(1, 5, 0, 80)
+mouse.Parent = window
+local contlr = keyboard:Clone()
+contlr.Name = "ControllerSF"
+contlr.Position = UDim2.new(2, 5, 0, 80)
+contlr.Parent = window
 
 for name, keycode in pairs(_Tune.Controls) do
 	local entry = keyboard.Placeholder:Clone()
 	entry.Name = name
 	entry.TextButton.Text = keycode.Name
 	entry.Visible = true
-	
+
 	if string.find(name, "Mouse") then
 		entry.Text = string.gsub(name, "Mouse", "")
 		entry.Parent = mouse
@@ -52,8 +58,8 @@ end
 for name, value in pairs(_Tune.Peripherals) do
 	local entry = keyboard.PlaceholderPeripheral:Clone()
 	entry.Name = name
-	entry.Frame.TextButton.Position = UDim2.new(value/100, 0, .5, 0)
-	entry.Frame.TextButton.TextBox.Text = math.round(value) .."%"
+	entry.Frame.TextButton.Position = UDim2.new(value / 100, 0, 0.5, 0)
+	entry.Frame.TextButton.TextBox.Text = math.round(value) .. "%"
 	entry.Visible = true
 
 	if string.find(name, "M") then
@@ -74,15 +80,15 @@ local function navTo(button)
 	for _, v in next, window:GetChildren() do
 		if v:IsA("TextButton") then
 			if v.Name == button.Name then
-				v.BackgroundColor3 = Color3.new(1,1,1)
+				v.BackgroundColor3 = Color3.new(1, 1, 1)
 				v.BackgroundTransparency = 0
 				v.TextColor3 = Color3.new()
 				v.UIGradient.Enabled = false
 				v.Frame.Visible = true
 			else
 				v.BackgroundColor3 = Color3.new()
-				v.BackgroundTransparency = .5
-				v.TextColor3 = Color3.new(1,1,1)
+				v.BackgroundTransparency = 0.5
+				v.TextColor3 = Color3.new(1, 1, 1)
 				v.UIGradient.Enabled = true
 				v.Frame.Visible = false
 			end
@@ -114,27 +120,40 @@ for _, entry in next, allEntries do
 	local button = entry:FindFirstChildWhichIsA("TextButton")
 	if button then --this is a normal key press thing
 		button.MouseButton1Click:Connect(function()
-			if con1 then con1:Disconnect() end
-			if con2 then con2:Disconnect() end
+			if con1 then
+				con1:Disconnect()
+			end
+			if con2 then
+				con2:Disconnect()
+			end
 			ControlsOpen.Value = true
 			window.Overlay.Visible = true
 			canInput = true
-			
+
 			con1 = UserInputService.InputBegan:Connect(function(input)
 				if canInput then
 					inputKey, inputType = input.KeyCode, input.UserInputType
 				end
 			end)
 			con2 = UserInputService.InputChanged:Connect(function(input)
-				if canInput and (input.KeyCode==Enum.KeyCode.Thumbstick1 or input.KeyCode==Enum.KeyCode.Thumbstick2) then
+				if
+					canInput
+					and (input.KeyCode == Enum.KeyCode.Thumbstick1 or input.KeyCode == Enum.KeyCode.Thumbstick2)
+				then
 					inputKey, inputType = input.KeyCode, input.UserInputType
 				end
 			end)
-			
-			repeat wait() until inputKey
-			if con1 then con1:Disconnect() end
-			if con2 then con2:Disconnect() end
-			
+
+			repeat
+				wait()
+			until inputKey
+			if con1 then
+				con1:Disconnect()
+			end
+			if con2 then
+				con2:Disconnect()
+			end
+
 			if inputKey == Enum.KeyCode.Return or inputKey == Enum.KeyCode.KeypadEnter then
 				-- do nothing
 			elseif string.find(entry.Name, "Contlr") then
@@ -148,12 +167,12 @@ for _, entry in next, allEntries do
 				if inputType == Enum.UserInputType.MouseButton1 or inputType == Enum.UserInputType.MouseButton2 then
 					Controls[entry.Name].Value = inputType.Name
 					button.Text = inputType.Name
-				elseif inputType ==  Enum.UserInputType.Keyboard then
+				elseif inputType == Enum.UserInputType.Keyboard then
 					Controls[entry.Name].Value = inputKey.Name
-					button.Text = inputKey.Name	
+					button.Text = inputKey.Name
 				else
 					window.Error.Visible = true
-				end	
+				end
 			else
 				if inputType == Enum.UserInputType.Keyboard then
 					Controls[entry.Name].Value = inputKey.Name
@@ -162,9 +181,9 @@ for _, entry in next, allEntries do
 					window.Error.Visible = true
 				end
 			end
-			
+
 			inputKey, inputType, canInput = nil, nil, false
-			wait(.2)
+			wait(0.2)
 			window.Overlay.Visible = false
 			ControlsOpen.Value = false
 		end)
@@ -180,17 +199,26 @@ for _, entry in next, allEntries do
 		end)
 		playermouse.Move:Connect(function()
 			if holding then
-				local x = (playermouse.X-entry.Frame.AbsolutePosition.X)/entry.Frame.AbsoluteSize.X
-				entry.Frame.TextButton.Position = UDim2.new(math.clamp(x, 0, 1), 0, .5, 0)
+				local x = (playermouse.X - entry.Frame.AbsolutePosition.X) / entry.Frame.AbsoluteSize.X
+				entry.Frame.TextButton.Position = UDim2.new(math.clamp(x, 0, 1), 0, 0.5, 0)
 			end
 		end)
 		entry.Frame.TextButton.Changed:Connect(function()
 			Controls[entry.Name].Value = entry.Frame.TextButton.Position.X.Scale * 100
-			entry.Frame.TextButton.TextBox.Text = math.round(Controls[entry.Name].Value).."%"
+			entry.Frame.TextButton.TextBox.Text = math.round(Controls[entry.Name].Value) .. "%"
 		end)
 		entry.Frame.TextButton.TextBox:GetPropertyChangedSignal("CursorPosition"):Connect(function()
 			if entry.Frame.TextButton.TextBox.CursorPosition == -1 then
-				entry.Frame.TextButton.Position = UDim2.new(math.clamp((tonumber(entry.Frame.TextButton.TextBox.Text) or Controls[entry.Name].Value)/100,0,1), 0, .5, 0)
+				entry.Frame.TextButton.Position = UDim2.new(
+					math.clamp(
+						(tonumber(entry.Frame.TextButton.TextBox.Text) or Controls[entry.Name].Value) / 100,
+						0,
+						1
+					),
+					0,
+					0.5,
+					0
+				)
 			end
 		end)
 	end
@@ -203,20 +231,18 @@ end)
 
 script.Parent.Toggle.MouseButton1Click:Connect(function()
 	if open then
-		script.Parent.Toggle.BackgroundColor3 = Color3.new(0,0,0)
-		script.Parent.Toggle.BackgroundTransparency = .5
+		script.Parent.Toggle.BackgroundColor3 = Color3.new(0, 0, 0)
+		script.Parent.Toggle.BackgroundTransparency = 0.5
 		script.Parent.Toggle.UIGradient.Enabled = true
-		script.Parent.Toggle.TextColor3 = Color3.new(1,1,1)
-		window:TweenPosition(UDim2.new(.5, 0, 1.5, 0), d, s, t, true, nil)
+		script.Parent.Toggle.TextColor3 = Color3.new(1, 1, 1)
+		window:TweenPosition(UDim2.new(0.5, 0, 1.5, 0), d, s, t, true, nil)
 		open = false
 	else
-		script.Parent.Toggle.BackgroundColor3 = Color3.new(1,1,1)
+		script.Parent.Toggle.BackgroundColor3 = Color3.new(1, 1, 1)
 		script.Parent.Toggle.BackgroundTransparency = 0
 		script.Parent.Toggle.UIGradient.Enabled = false
-		script.Parent.Toggle.TextColor3 = Color3.new(0,0,0)
-		window:TweenPosition(UDim2.new(.5, 0, .5, 0), d, s, t, true, nil)
+		script.Parent.Toggle.TextColor3 = Color3.new(0, 0, 0)
+		window:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), d, s, t, true, nil)
 		open = true
 	end
 end)
-
-

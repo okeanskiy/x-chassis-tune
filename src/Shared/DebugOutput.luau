@@ -1,4 +1,3 @@
-
 local DebugOutputFolder = workspace.DebugOutput :: Folder
 
 local function inferType(value)

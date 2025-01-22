@@ -1,29 +1,28 @@
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Values = script.Parent.Values
 local Units = require(ReplicatedStorage.Units)
 
-local WindVolumeCoefficient = .6
-local BodyVolumeCoefficient = .4
+local WindVolumeCoefficient = 0.6
+local BodyVolumeCoefficient = 0.4
 
-local DragCoefficient = .42
+local DragCoefficient = 0.42
 
 local DownforceFrontCoefficient = 336
 local DownforceRearCoefficient = 381
 local DownforceBlownDiffuser = 25
 
 local SlipstreamDragReduction = 0.6
-local SlipstreamTimeWindow = .7
+local SlipstreamTimeWindow = 0.7
 local SlipstreamSamples = 5
 
 local car = script.Parent.Car.Value
 local player = game.Players.LocalPlayer
 local weight = car.Body["#Weight"]
 
-local toKMH = (Units.Length_mm/1000) * 3.6
-local fromKGF = 9.81*Units.Force_N
+local toKMH = (Units.Length_mm / 1000) * 3.6
+local fromKGF = 9.81 * Units.Force_N
 
 wait()
 local WindSound = weight:FindFirstChild("AerodynamicsWindSound") or Instance.new("Sound")
@@ -54,7 +53,7 @@ BodySound.Parent = weight
 BodySound:Play()
 
 local aeroParams = RaycastParams.new()
-aeroParams.FilterDescendantsInstances = {car, player.Character}
+aeroParams.FilterDescendantsInstances = { car, player.Character }
 aeroParams.FilterType = Enum.RaycastFilterType.Exclude
 local aeroParamsFrom = RaycastParams.new()
 aeroParamsFrom.FilterDescendantsInstances = {}
@@ -68,7 +67,7 @@ for _, v in next, car:GetDescendants() do
 end
 
 local function calcDownforce(speed, constant)
-	return (speed^2/(200)^2) * constant
+	return (speed ^ 2 / 200 ^ 2) * constant
 end
 
 local function calcSlipstreamCoefficient()
@@ -81,11 +80,7 @@ local function calcSlipstreamCoefficient()
 		local fraction = i / (SlipstreamSamples - 1) - 0.5
 		local offsetPos = weight.Position + rightVector * (fraction * carWidth)
 
-		local forwardSlipstreamResult = workspace:Raycast(
-			offsetPos, 
-			lookVector * 1000, 
-			aeroParams
-		)
+		local forwardSlipstreamResult = workspace:Raycast(offsetPos, lookVector * 1000, aeroParams)
 
 		if forwardSlipstreamResult then
 			aeroParamsFrom.FilterDescendantsInstances = forwardSlipstreamResult.Instance:GetConnectedParts()
@@ -100,7 +95,7 @@ local function calcSlipstreamCoefficient()
 				local streamSourceVelocity = forwardSlipstreamResult.Instance.Velocity
 				local streamMagnitude = (streamSourceVelocity * SlipstreamTimeWindow).Magnitude
 				local distance = backwardSlipstreamResult.Distance
-				
+
 				if streamMagnitude > 0 then
 					local streamCoefficient = 1 - (distance / streamMagnitude)
 					streamCoefficient = math.clamp(streamCoefficient, 0, 1)
@@ -115,13 +110,13 @@ local function calcSlipstreamCoefficient()
 end
 
 local function updateSoundVolume(windSpeedKMH: number)
-	WindSound.Volume = windSpeedKMH^2 * WindVolumeCoefficient / (200)^2
-	BodySound.Volume = windSpeedKMH^2 * BodyVolumeCoefficient / (200)^2
+	WindSound.Volume = windSpeedKMH ^ 2 * WindVolumeCoefficient / 200 ^ 2
+	BodySound.Volume = windSpeedKMH ^ 2 * BodyVolumeCoefficient / 200 ^ 2
 end
 
 local function onHeartbeat(dt)
 	local dragFactor = 1
-	
+
 	local slipstreamCoefficient = calcSlipstreamCoefficient()
 	dragFactor -= dragFactor * SlipstreamDragReduction * slipstreamCoefficient
 
@@ -139,26 +134,14 @@ local function onHeartbeat(dt)
 	DragCoefficient = workspace.DebugValues.AeroDragCoefficient.Value
 	local dragForce = windSpeedKMH ^ 2 * DragCoefficient / 100
 	local upVector = weight.CFrame.UpVector
-	
-	weight:ApplyImpulseAtPosition(
-		-upVector * dt * downforce_front * fromKGF,
-		car.Body.Downforce_WingF.Position
-	)
 
-	weight:ApplyImpulseAtPosition(
-		-upVector * dt * downforce_rear * fromKGF,
-		car.Body.Downforce_WingR.Position
-	)
-	
-	weight:ApplyImpulseAtPosition(
-		-upVector * dt * downforce_diffuser * fromKGF,
-		car.Body.Diffuser.Position
-	)
+	weight:ApplyImpulseAtPosition(-upVector * dt * downforce_front * fromKGF, car.Body.Downforce_WingF.Position)
 
-	weight:ApplyImpulseAtPosition(
-		-velocity.Unit * dt * dragForce * fromKGF,
-		car.Body.Drag.Position
-	)
+	weight:ApplyImpulseAtPosition(-upVector * dt * downforce_rear * fromKGF, car.Body.Downforce_WingR.Position)
+
+	weight:ApplyImpulseAtPosition(-upVector * dt * downforce_diffuser * fromKGF, car.Body.Diffuser.Position)
+
+	weight:ApplyImpulseAtPosition(-velocity.Unit * dt * dragForce * fromKGF, car.Body.Drag.Position)
 
 	updateSoundVolume(windSpeedKMH)
 end

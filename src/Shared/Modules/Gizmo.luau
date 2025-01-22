@@ -324,7 +324,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 
 local function enableGizmos()
-	onRender = Event:Connect(function ()
+	onRender = Event:Connect(function()
 		local frame, textFrame = queue, textQueue
 		queue, textQueue = {}, {}
 		for _, adornment in ipairs(frame) do
@@ -352,7 +352,7 @@ local function disableGizmos()
 	end
 end
 
-workspace:GetAttributeChangedSignal(ENABLED_ATTRIBUTE):Connect(function ()
+workspace:GetAttributeChangedSignal(ENABLED_ATTRIBUTE):Connect(function()
 	if workspace:GetAttribute(ENABLED_ATTRIBUTE) then
 		enableGizmos()
 	else

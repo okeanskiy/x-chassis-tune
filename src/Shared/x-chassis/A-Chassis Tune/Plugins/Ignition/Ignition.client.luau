@@ -15,11 +15,17 @@ local IGNITION_CONTROLLER = Enum.KeyCode.ButtonB
 local UserInputService = game:GetService("UserInputService")
 local gamepadPresent = UserInputService.GamepadEnabled
 
-local function onInput(input:InputObject, gameProcessedEvent:boolean)
-	if gameProcessedEvent then return end
-	if not (input.KeyCode == IGNITION_KEYBOARD or input.KeyCode == IGNITION_CONTROLLER) then return end
+local function onInput(input: InputObject, gameProcessedEvent: boolean)
+	if gameProcessedEvent then
+		return
+	end
+	if not (input.KeyCode == IGNITION_KEYBOARD or input.KeyCode == IGNITION_CONTROLLER) then
+		return
+	end
 	if script.Parent.Parent.IsOn.Value then
-		if input.UserInputState == Enum.UserInputState.End then return end
+		if input.UserInputState == Enum.UserInputState.End then
+			return
+		end
 		script.Parent.Parent.IsOn.Value = false
 	else
 		script.Parent.Parent.Starting.Value = input.UserInputState == Enum.UserInputState.Begin
@@ -28,7 +34,9 @@ end
 
 local function update()
 	gamepadPresent = UserInputService.GamepadEnabled
-	script.Parent.Text = "Hold <i><stroke color='#000000' thickness='2'><font weight='900'>"..(gamepadPresent and IGNITION_CONTROLLER.Name or IGNITION_KEYBOARD.Name).."</font></stroke></i> to turn on."
+	script.Parent.Text = "Hold <i><stroke color='#000000' thickness='2'><font weight='900'>"
+		.. (gamepadPresent and IGNITION_CONTROLLER.Name or IGNITION_KEYBOARD.Name)
+		.. "</font></stroke></i> to turn on."
 	script.Parent.Visible = not script.Parent.Parent.IsOn.Value
 end
 

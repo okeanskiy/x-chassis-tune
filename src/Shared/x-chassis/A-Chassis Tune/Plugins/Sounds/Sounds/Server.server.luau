@@ -13,7 +13,7 @@ local function create(car, vars)
 	for i, v in next, vars.EngineSounds do
 		local ns = Instance.new("Sound")
 		ns.Name = v.name
-		ns.SoundId = "rbxassetid://"..v.id
+		ns.SoundId = "rbxassetid://" .. v.id
 		ns.Looped = true
 		ns.Volume = 0
 		ns.RollOffMaxDistance = v.rollOffMax
@@ -45,7 +45,7 @@ local function create(car, vars)
 	for i, v in next, vars.TurboSounds do
 		local ns = Instance.new("Sound")
 		ns.Name = v.name
-		ns.SoundId = "rbxassetid://"..v.id
+		ns.SoundId = "rbxassetid://" .. v.id
 		ns.Looped = true
 		ns.Volume = 0
 		ns.RollOffMaxDistance = v.rollOffMax
@@ -61,7 +61,7 @@ local function create(car, vars)
 	for i, v in next, vars.SuperSounds do
 		local ns = Instance.new("Sound")
 		ns.Name = v.name
-		ns.SoundId = "rbxassetid://"..v.id
+		ns.SoundId = "rbxassetid://" .. v.id
 		ns.Looped = true
 		ns.Volume = 0
 		ns.RollOffMaxDistance = v.rollOffMax
@@ -77,7 +77,7 @@ local function create(car, vars)
 	for i, v in next, vars.BovSounds do
 		local ns = Instance.new("Sound")
 		ns.Name = v.name
-		ns.SoundId = "rbxassetid://"..v.id
+		ns.SoundId = "rbxassetid://" .. v.id
 		ns.Volume = 0
 		ns.RollOffMaxDistance = v.rollOffMax
 		ns.RollOffMinDistance = v.rollOffMin
@@ -92,7 +92,7 @@ local function create(car, vars)
 	for i, v in next, vars.TransmissionSounds do
 		local ns = Instance.new("Sound")
 		ns.Name = v.name
-		ns.SoundId = "rbxassetid://"..v.id
+		ns.SoundId = "rbxassetid://" .. v.id
 		ns.Looped = true
 		ns.Volume = 0
 		ns.RollOffMaxDistance = v.rollOffMax
@@ -143,25 +143,51 @@ local function updateTrans(i, vol, pit)
 end
 
 local function play()
-	for _, v in next, newEngineSounds do v:Play() end
-	for _, v in next, newTurboSounds do v:Play() end
-	for _, v in next, newSuperSounds do v:Play() end
-	for _, v in next, newTransSounds do v:Play() end
+	for _, v in next, newEngineSounds do
+		v:Play()
+	end
+	for _, v in next, newTurboSounds do
+		v:Play()
+	end
+	for _, v in next, newSuperSounds do
+		v:Play()
+	end
+	for _, v in next, newTransSounds do
+		v:Play()
+	end
 end
 
 local function stop()
-	for _, v in next, newEngineSounds do v:Stop() end
-	for _, v in next, newTurboSounds do v:Stop() end
-	for _, v in next, newSuperSounds do v:Stop() end
-	for _, v in next, newTransSounds do v:Stop() end
+	for _, v in next, newEngineSounds do
+		v:Stop()
+	end
+	for _, v in next, newTurboSounds do
+		v:Stop()
+	end
+	for _, v in next, newSuperSounds do
+		v:Stop()
+	end
+	for _, v in next, newTransSounds do
+		v:Stop()
+	end
 end
 
 local function remove()
-	for _, v in next, newEngineSounds do v:Destroy() end
-	for _, v in next, newTurboSounds do v:Destroy() end
-	for _, v in next, newSuperSounds do v:Destroy() end
-	for _, v in next, newBOVSounds do v:Destroy() end
-	for _, v in next, newTransSounds do v:Destroy() end
+	for _, v in next, newEngineSounds do
+		v:Destroy()
+	end
+	for _, v in next, newTurboSounds do
+		v:Destroy()
+	end
+	for _, v in next, newSuperSounds do
+		v:Destroy()
+	end
+	for _, v in next, newBOVSounds do
+		v:Destroy()
+	end
+	for _, v in next, newTransSounds do
+		v:Destroy()
+	end
 end
 
 script.Parent.OnServerEvent:Connect(function(player, func, car, ...)
